@@ -1,0 +1,403 @@
+{{ define "business.html" }}
+{{ template "head.html" .}}
+		<div class="main-container ace-save-state" id="main-container">
+			
+			{{ template "left.html" .}}
+
+			<div class="main-content">
+				<div class="main-content-inner">
+					
+					{{ template "breadcrumbs.html" .}}
+
+					<div class="page-content no-padding-bottom">
+
+						<form id="mainform" name="mainform" method="post" action="" enctype="multipart/form-data">
+							<input type="hidden" id="cmd" name="cmd" value="">
+							<input type="hidden" id="searchNo" name="searchNo" value="">
+
+						<div class="page-header" id="div-search" style="{{ if ne (mapValue .cookie "cookie_show_search") "1" }}display: none;{{ end }}">
+							<div class="clearfix">
+								<div class="col-xs-12 col-sm-4" style="padding-left: 0px;">
+									<div class="input-group">
+										<span class="input-group-addon">企业Key</span>
+
+										<input type="text" name="searchKey" class="form-control search-query" placeholder="" value="{{ .data.searchKey }}" />
+									</div>
+								</div>
+								<div class="col-xs-12 col-sm-4" style="padding-left: 0px;">
+									<div class="input-group">
+										<span class="input-group-addon">企业名字</span>
+
+										<input type="text" name="searchName" class="form-control search-query" placeholder="" value="{{ .data.searchName }}" />
+									</div>
+								</div>
+								<div class="col-xs-12" style="width: 100px;">
+									<span class="input-group-btn">
+										<button type="button" class="btn btn-purple btn-sm" id="btn-search">
+											<span class="ace-icon fa fa-search icon-on-right bigger-110"></span>
+											Search
+										</button>
+									</span>
+								</div>
+							</div>
+						</div><!-- /.page-header -->
+
+						<div class="row">
+							<div class="col-xs-12">
+								<!-- PAGE CONTENT BEGINS -->
+								<div class="row">
+									<div class="col-xs-12">
+										<div class="clearfix">
+											<div class="pull-left tableTools-container">
+												<button id="btn-add" type="button" class="btn btn-white btn-default btn-bold" data-toggle="modal" data-target="#modal-edit" data-backdrop="static" data-keyboard="false">
+													<i class="fa fa-plus bigger-110 blue"></i>
+													新增
+												</button>
+												<button id="btn-edit" type="button" class="btn btn-white btn-default btn-bold" data-toggle="modal" data-target="#modal-edit" data-backdrop="static" data-keyboard="false">
+													<i class="fa fa-edit bigger-110 pink"></i> 
+													编辑
+												</button>
+												<button id="btn-del" type="button" class="btn btn-white btn-danger btn-bold">
+													<i class="fa fa-trash-o bigger-110 red"></i> 
+													删除
+												</button>
+												<button id="btn-download" type="button" class="btn btn-white btn-default btn-bold">
+													<i class="fa fa-download bigger-110 orange"></i> 
+													下载
+												</button>
+												<button id="btn-upload" type="button" class="btn btn-white btn-default btn-bold">
+													<i class="fa fa-upload bigger-110 orange2"></i> 
+													导入
+												</button>
+												<button id="btn-print" type="button" class="btn btn-white btn-default btn-bold">
+													<i class="fa fa-print bigger-110 grey"></i> 
+													打印
+												</button>
+											</div>
+											{{ template "page.html" .}}
+										</div>
+										<table id="main-table" class="table  table-bordered table-hover no-margin-bottom">
+											<thead>
+												<tr>
+													<th class="center" style="width: 40px;">
+														<label class="pos-rel">
+															<input type="checkbox" class="ace" />
+															<span class="lbl"></span>
+														</label>
+													</th>
+													<th class="detail-col">No.</th>
+													<th>企业名字</th>
+													<th>企业Key</th>
+													<th style="width: 50px;">状态</th>
+													<th style="width: 140px;">创建时间</th>
+													<th style="width: 140px;">更新时间</th>
+													<th style="width: 70px;"></th>
+												</tr>
+											</thead>
+
+											<tbody>
+												{{range $i, $v := .data.res}}
+												<tr>
+													<td class="center">
+														<label class="pos-rel">
+															<input name="selectNo" type="checkbox" class="ace" value="{{ $v.BusNo }}"/>
+															<span class="lbl"></span>
+														</label>
+													</td>
+
+													<td class="center">{{ multAdd $i 1 (multTimes (multMinus $.common.pageNo 1) $.common.pageRow) }}</td>
+
+													<td>{{ $v.BusName }}</td>
+													<td>{{ $v.BusKey }}</td>
+													<td>{{ if eq $v.BusStatus `0` }}停用{{ else }}启用{{end}}</td>
+													<td>{{ formatAsDate $v.BusInputdate `yyyy-MM-dd hh:mm:ss`}}</td>
+													<td>{{ formatAsDate $v.BusUpdate `yyyy-MM-dd hh:mm:ss`}}</td>
+													
+													<td>
+														<div class="btn-group">
+															<button id="btn-edit-{{ $v.BusNo }}" type="button" class="btn btn-xs btn-danger" data-selectno="{{ $v.BusNo }}" data-toggle="modal" data-target="#modal-edit" data-backdrop="static" data-keyboard="false">查看</button>
+															<button type="button" data-toggle="dropdown" class="btn btn-xs btn-danger dropdown-toggle" aria-expanded="false">
+																<span class="ace-icon fa fa-caret-down icon-only"></span>
+															</button>
+
+															<ul class="dropdown-menu dropdown-danger">
+																<li>
+																	<a id="btn-edit2-{{ $v.BusNo }}" href="#modal-edit" data-selectno="{{ $v.BusNo }}" data-toggle="modal">编辑</a>
+																</li>
+
+																<li>
+																	<a href="javascript: void(0)" onclick="delSubmit({{ $v.BusNo }});">删除</a>
+																</li>
+															</ul>
+														</div>
+													</td>
+												</tr>
+												{{end}}
+											</tbody>
+										</table>
+									</div><!-- /.span -->
+								</div><!-- /.row -->
+								<!-- PAGE CONTENT ENDS -->
+							</div><!-- /.col -->
+						</div><!-- /.row -->
+						</form>
+
+						<div id="modal-edit" class="modal fade" tabindex="-1">
+							<div class="modal-progress">
+								<h3 class="smaller lighter grey">
+									<i class="ace-icon fa fa-spinner fa-spin orange bigger-125"></i>
+								</h3>
+							</div>
+							<div class="modal-dialog" style="width: 400px;">
+								<div class="modal-content">
+									<form id="modalform" name="modalform" method="post" action="" enctype="multipart/form-data">
+									<div class="modal-header no-padding">
+										<div class="table-header modal-ellipsis">
+											<button type="button" class="bootbox-close-button close" data-dismiss="modal" aria-hidden="true">
+												<span class="white">&times;</span>
+											</button>
+											<span class="modal-title">新增或编辑</span>
+										</div>
+									</div>
+
+									<div class="modal-body">
+										<div class="row">
+											<div class="col-xs-12 form-horizontal">
+												<input type="hidden" id="modal-busno" name="modal-busno">
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-busname">企业名字</label>
+													<div class="col-sm-9">
+														<input type="text" id="modal-busname" name="modal-busname" class="col-xs-10 col-sm-12">
+														<div id="errmodal-busname" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-buskey">企业Key</label>
+													<div class="col-sm-9">
+														<input type="text" id="modal-buskey" name="modal-buskey" class="col-xs-10 col-sm-12">
+														<div id="errmodal-buskey" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-busstatus">状态</label>
+													<div class="col-sm-9">
+														<select id="modal-busstatus" name="modal-busstatus" class="form-control col-xs-10 col-sm-12">
+															<option value="0">停用</option>
+															<option value="1" checked>启用</option>
+														</select>
+														<div id="errmodal-busstatus" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-busmemo">备注</label>
+													<div class="col-sm-9">
+														<textarea class="input-xlarge" id="modal-busmemo" name="modal-busmemo" rows="5"></textarea>
+														<div id="errmodal-busmemo" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+											</div>
+										</div>
+										
+									</div>
+
+									<div class="modal-footer no-margin-top">
+										<button id="btn-modal-cancel" type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="width: 70px;">取消</button>
+										<button id="btn-modal-save" type="button" class="btn btn-sm btn-primary" data-loading-text="提交中..." style="min-width: 70px;">保存</button>
+									</div>
+									</form>
+								</div><!-- /.modal-content -->
+							</div><!-- /.modal-dialog -->
+						</div>
+
+					</div><!-- /.page-content -->
+				</div>
+			</div><!-- /.main-content -->
+			{{ template "foot.html" .}}
+
+		<!-- inline scripts related to this page -->
+		<script type="text/javascript">
+
+			$('#btn-search').on('click', function(e) {
+				$('#pageNo').val(1);
+				$('#cmd').val('list_search');
+				$("#mainform").submit();
+			});
+
+			$('#btn-del').on(ace.click_event, function() {
+				var arr_no = [];
+				$("input[name='selectNo']").each(function(){
+					if ($(this).is(':checked')) {
+						arr_no.push($(this).val());
+					}
+				});
+
+				if (arr_no.length == 0) {
+					showAlertDialog('请最少选择一条数据！');
+					return false;
+				}
+				bootbox.confirm("确定要删除数据吗？", function (result) {
+					if (result) {
+						$('#cmd').val('list_del');
+						$("#mainform").submit();
+					}
+				});
+			});
+
+			$('#btn-download').on('click', function(e) {
+				$('#cmd').val('list_download');
+				$("#mainform").submit();
+			});
+
+			$('#btn-upload').on('click', function(e) {
+				$('#cmd').val('list_upload');
+				$("#mainform").submit();
+			});
+
+			$('#modal-edit').on('show.bs.modal', function (event) {
+				var modal = $(this);
+				var button = $(event.relatedTarget) // Button that triggered the modal
+				//var recipient = button.data('whatever') // Extract info from data-* attributes
+
+				clearModalValue(modal);
+				clearModalError(modal);
+				
+				if ($(button).attr("id") == 'btn-add') {
+					modal.find('#modal-busname').removeAttr('readonly');
+					modal.find('#modal-buskey').removeAttr('readonly');
+					modal.find('#modal-busstatus').val('1');
+				} else {
+					modal.find('#modal-busname').attr('readonly', 'true');
+					modal.find('#modal-buskey').attr('readonly', 'true');
+				}
+
+				if ($(button).attr("id") == 'btn-add') {
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+					modal.find('.modal-title').text('新增企业')
+				} else if ($(button).attr("id") == 'btn-edit') {
+					var arr_no = [];
+					$("input[name='selectNo']").each(function(){
+						if ($(this).is(':checked')) {
+							arr_no.push($(this).val());
+						}
+					});
+
+					var errmsg = '';
+					if (arr_no.length == 0)
+						errmsg = '请选择一条数据！';
+					else if (arr_no.length > 1)
+						errmsg = '只能选择一条数据！';
+
+					if (errmsg != '') {
+						showAlertDialog(errmsg);
+						return false;
+					}
+
+					showEdit(modal, arr_no[0]);
+
+					modal.find('.modal-progress').show();
+					modal.find('.modal-content').hide();
+				} else if ($(button).attr("id").indexOf('btn-edit-') == 0 || 
+							$(button).attr("id").indexOf('btn-edit2-') == 0) {
+					var selectNo = $(button).data("selectno");
+					if (selectNo == null || selectNo == '') {
+						showAlertDialog('未知错误！');
+						return false;
+					}
+
+					showEdit(modal, selectNo);
+
+					modal.find('.modal-progress').show();
+					modal.find('.modal-content').hide();
+				}
+			});
+
+			$('#btn-modal-save').on(ace.click_event, function() {
+				var btn = $(this);
+				btn.button('loading');
+				
+				var data = removeKeyModal($('#modalform').serializeObject());
+				if ($('#modal-busno').val() == '')
+					data['cmd'] = 'ajax_add';
+				else
+					data['cmd'] = 'ajax_edit';
+
+				ajaxPost(window.location.pathname, data, function(obj){
+					btn.button('reset');
+
+					if (obj == null) {
+						$('#modal-edit').modal('hide');
+						showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+					if (typeof(obj) != 'object') {
+						$('#modal-edit').modal('hide');
+						showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+					if (obj.ret == 1000) {
+						showModalError(obj.error, $('#modal-edit'));
+						return;
+					} else if (obj.ret != 0) {
+						$('#modal-edit').modal('hide');
+						showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+					$('#modal-edit').modal('hide');
+					$('#cmd').val('list_search');
+					$("#mainform").submit();
+				});
+			});
+
+			function showEdit(modal,value) {
+				var data = {"cmd":"ajax_detail", "searchNo":value};
+				ajaxPost(window.location.pathname, data, function(obj){
+					if (obj == null) {
+						$('#modal-edit').modal('hide');
+						showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+					if (typeof(obj) != 'object') {
+						$('#modal-edit').modal('hide');
+						showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+					if (obj.ret != 0) {
+						$('#modal-edit').modal('hide');
+						showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+					if (!obj.hasOwnProperty('data')) {console.log(4);
+						$('#modal-edit').modal('hide');
+						showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+
+					modal.find('.modal-title').text('编辑企业：' + obj.data.BusName);
+
+					showModalValue(obj.data, modal);
+				});
+			}
+
+			//必须在外部，否则html元素那边无法调用
+			function delSubmit(value) {
+				if (value == null || value == '') {
+					showAlertDialog('请选择一条数据！');
+					return false;
+				}
+
+				bootbox.confirm("确定要删除数据吗？", function (result) {
+					if (result) {
+						$('#searchNo').val(value);
+						$('#cmd').val('list_del');
+						$("#mainform").submit();
+					}
+				});
+				return false;
+			}
+		</script>
+	</body>
+</html>
+{{ end }}

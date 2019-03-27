@@ -1,0 +1,764 @@
+{{ define "item.html" }}
+{{ template "head.html" .}}
+		<div class="main-container ace-save-state" id="main-container">
+			
+			{{ template "left.html" .}}
+
+			<div class="main-content">
+				<div class="main-content-inner">
+					
+					{{ template "breadcrumbs.html" .}}
+
+					<div class="page-content no-padding-bottom">
+
+						<form id="mainform" name="mainform" method="post" action="" enctype="multipart/form-data">
+							<input type="hidden" id="cmd" name="cmd" value="">
+							<input type="hidden" id="searchNo" name="searchNo" value="">
+
+						<div class="page-header" id="div-search" style="{{ if ne (mapValue .cookie "cookie_show_search") "1" }}display: none;{{ end }}">
+							<div class="clearfix">
+								<div class="col-xs-12 col-sm-4" style="padding-left: 0px;">
+									<div class="input-group">
+										<span class="input-group-addon">名称</span>
+
+										<input type="text" name="searchName" class="form-control search-query" placeholder="" value="{{ .data.searchName }}" />
+									</div>
+								</div>
+								<div class="col-xs-12" style="width: 100px;">
+									<span class="input-group-btn">
+										<button type="button" class="btn btn-purple btn-sm" id="btn-search">
+											<span class="ace-icon fa fa-search icon-on-right bigger-110"></span>
+											Search
+										</button>
+									</span>
+								</div>
+							</div>
+						</div><!-- /.page-header -->
+
+						<div class="row">
+							<div class="col-xs-12">
+								<div class="col-sm-12 text-danger no-padding">{{ .error.commomMsg }}</div>
+								<div class="col-sm-12 text-danger no-padding">{{ .error.uploadFile }}</div>
+								<!-- PAGE CONTENT BEGINS -->
+								<div class="row">
+									<div class="col-xs-12">
+										<div class="clearfix">
+											<div class="pull-left tableTools-container">
+												<button id="btn-add" type="button" class="btn btn-white btn-default btn-bold" data-toggle="modal" data-target="#modal-edit" data-backdrop="static" data-keyboard="false">
+													<i class="fa fa-plus bigger-110 blue"></i>
+													新增
+												</button>
+												<button id="btn-edit" type="button" class="btn btn-white btn-default btn-bold" data-toggle="modal" data-target="#modal-edit" data-backdrop="static" data-keyboard="false">
+													<i class="fa fa-edit bigger-110 pink"></i> 
+													编辑
+												</button>
+												<button id="btn-del" type="button" class="btn btn-white btn-danger btn-bold">
+													<i class="fa fa-trash-o bigger-110 red"></i> 
+													删除
+												</button>
+												<button id="btn-download" type="button" class="btn btn-white btn-default btn-bold">
+													<i class="fa fa-download bigger-110 orange"></i> 
+													下载
+												</button>
+											</div>
+											{{ template "page.html" .}}
+										</div>
+										<table id="main-table" class="table  table-bordered table-hover no-margin-bottom">
+											<thead>
+												<tr>
+													<th class="center" style="width: 40px;">
+														<label class="pos-rel">
+															<input type="checkbox" class="ace" />
+															<span class="lbl"></span>
+														</label>
+													</th>
+													<th class="detail-col">No.</th>
+													<th>名称</th>
+													<th>规格</th>
+													<th>分类</th>
+													<th>状态</th>
+													<th style="width: 100px;">图片</th>
+													<th style="width: 140px;">创建时间</th>
+													<th style="width: 140px;">更新时间</th>
+													<th style="width: 70px;"></th>
+												</tr>
+											</thead>
+
+											<tbody>
+												{{range $i, $v := .data.res}}
+												<tr>
+													<td class="center">
+														<label class="pos-rel">
+															<input name="selectNo" type="checkbox" class="ace" value="{{ $v.ItemNo }}"/>
+															<span class="lbl"></span>
+														</label>
+													</td>
+
+													<td class="center">{{ multAdd $i 1 (multTimes (multMinus $.common.pageNo 1) $.common.pageRow) }}</td>
+
+													<td>{{ $v.ItemName }}</td>
+													<td>{{ $v.ItemType }}</td>
+													<td>分类</td>
+													<td>状态</td>
+													<td>图片</td>
+													<td>{{ formatAsDate $v.ItemInputdate `yyyy-MM-dd hh:mm:ss`}}</td>
+													<td>{{ formatAsDate $v.ItemUpdate `yyyy-MM-dd hh:mm:ss`}}</td>
+													
+													<td>
+														<div class="btn-group">
+															<button id="btn-edit-{{ $v.ItemNo }}" type="button" class="btn btn-xs btn-danger" data-selectno="{{ $v.ItemNo }}" data-toggle="modal" data-target="#modal-edit" data-backdrop="static" data-keyboard="false">查看</button>
+															<button type="button" data-toggle="dropdown" class="btn btn-xs btn-danger dropdown-toggle" aria-expanded="false">
+																<span class="ace-icon fa fa-caret-down icon-only"></span>
+															</button>
+
+															<ul class="dropdown-menu dropdown-menu-right dropdown-danger">
+																<li>
+																	<a id="btn-edit2-{{ $v.ItemNo }}" href="#modal-edit" data-selectno="{{ $v.ItemNo }}" data-toggle="modal">编辑</a>
+																</li>
+
+																<li>
+																	<a href="javascript: void(0)" onclick="delSubmit({{ $v.ItemNo }});">删除</a>
+																</li>
+																{{ if gt (len $.app.languages) 0 }}
+																<li class="divider"></li>
+																{{end}}
+																{{range $j, $w := $.app.languages}}
+																<li>
+																	<a id="btn-lang-{{$j}}-{{ $v.ItemNo }}" href="#modal-edit-lang" data-selectno="{{ $v.ItemNo }}" data-lang="{{ $j }}" data-toggle="modal">{{$w}}</a>
+																</li>
+																{{end}}
+															</ul>
+														</div>
+													</td>
+												</tr>
+												{{end}}
+											</tbody>
+										</table>
+									</div><!-- /.span -->
+								</div><!-- /.row -->
+								<!-- PAGE CONTENT ENDS -->
+							</div><!-- /.col -->
+						</div><!-- /.row -->
+						</form>
+
+						<div id="modal-edit" class="modal fade" tabindex="-1">
+							<div class="modal-progress">
+								<h3 class="smaller lighter grey">
+									<i class="ace-icon fa fa-spinner fa-spin orange bigger-125"></i>
+								</h3>
+							</div>
+							<div class="modal-dialog" style="width: 800px;">
+								<div class="modal-content">
+									<form id="modalform" name="modalform" method="post" action="" enctype="multipart/form-data">
+									<div class="modal-header no-padding">
+										<div class="table-header modal-ellipsis">
+											<button type="button" class="bootbox-close-button close" data-dismiss="modal" aria-hidden="true">
+												<span class="white">&times;</span>
+											</button>
+											<span class="modal-title">新增或编辑</span>
+										</div>
+									</div>
+
+									<div class="modal-body">
+										<div class="row">
+											<div class="col-xs-12 form-horizontal">
+												<input type="hidden" id="modal-itemno" name="modal-itemno">
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-itemname">名称</label>
+													<div class="col-sm-11">
+														<input type="text" id="modal-itemname" name="modal-itemname" class="col-xs-10 col-sm-12">
+														<div id="errmodal-itemname" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-itemtype">规格</label>
+													<div class="col-sm-11">
+														<input type="text" id="modal-itemtype" name="modal-itemtype" class="col-xs-10 col-sm-12">
+														<div id="errmodal-itemtype" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-itemclassno">分类</label>
+													<div class="col-sm-11">
+														<input type="text" id="modal-itemclassno" name="modal-itemclassno">
+														<div id="errmodal-itemclassno" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-itempict">图片</label>
+													<div class="col-sm-11">
+														<div id="div-images">
+														</div>
+														<div id="errmodal-itempict" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-itemstatus">状态</label>
+													<div class="col-sm-11">
+														<div>
+															<label style="margin-top: 6px;">
+																<input class="ace" id="modal-itemstatus1" name="modal-itemstatus" type="radio" value="1">
+																<span class="lbl"> 正常 </span>
+															</label>&nbsp;&nbsp;&nbsp;&nbsp;
+															<label style="margin-top: 6px;">
+																<input class="ace" id="modal-itemstatus0" name="modal-itemstatus" type="radio" value="0">
+																<span class="lbl"> 下架 </span>
+															</label>
+														</div>
+														<div id="errmodal-itemstatus" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-iteminfo">详情</label>
+													<div class="col-sm-11">
+														<input type="hidden" id="modal-iteminfo" name="modal-iteminfo">
+														<div class="wysiwyg-editor" style="overflow:scroll;height: 400px;max-height: 400px;" id="modal-editor"></div>
+														<div id="errmodal-iteminfo" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+											</div>
+										</div>
+										
+									</div>
+
+									<div class="modal-footer no-margin-top">
+										<button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="width: 70px;">取消</button>
+										<button id="btn-modal-save" type="button" class="btn btn-sm btn-primary" data-loading-text="提交中..." style="min-width: 70px;">保存</button>
+									</div>
+									</form>
+								</div><!-- /.modal-content -->
+							</div><!-- /.modal-dialog -->
+						</div>
+
+						{{ if gt (len $.app.languages) 0 }}
+						<!-- language -->
+						<div id="modal-edit-lang" class="modal fade" tabindex="-1">
+							<div class="modal-progress">
+								<h3 class="smaller lighter grey">
+									<i class="ace-icon fa fa-spinner fa-spin orange bigger-125"></i>
+								</h3>
+							</div>
+							<div class="modal-dialog" style="width: 400px;">
+								<div class="modal-content">
+									<form id="modallangform" name="modallangform" method="post" action="" enctype="multipart/form-data">
+									<div class="modal-header no-padding">
+										<div class="table-header modal-ellipsis">
+											<button type="button" class="bootbox-close-button close" data-dismiss="modal" aria-hidden="true">
+												<span class="white">&times;</span>
+											</button>
+											<span class="modal-title">多语言</span>
+										</div>
+									</div>
+
+									<div class="modal-body">
+										<div class="row">
+											<div class="col-xs-12 form-horizontal">
+												<input type="hidden" id="modal-itemno" name="modal-itemno">
+												<input type="hidden" id="modal-langcode" name="modal-langcode">
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-itemname">名称</label>
+													<div class="col-sm-11">
+														<input type="text" id="modal-itemname" name="modal-itemname" class="col-xs-10 col-sm-12">
+														<div id="errmodal-itemname" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-itemtype">规格</label>
+													<div class="col-sm-11">
+														<input type="text" id="modal-itemtype" name="modal-itemtype" class="col-xs-10 col-sm-12">
+														<div id="errmodal-itemtype" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-itemdescription">招聘要求</label>
+													<div class="col-sm-11">
+														<input type="hidden" id="modal-iteminfo" name="modal-iteminfo">
+														<div class="wysiwyg-editor" style="overflow:scroll;height: 400px;max-height: 400px;" id="modal-editor2"></div>
+														<div id="errmodal-iteminfo" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+											</div>
+										</div>
+										
+									</div>
+
+									<div class="modal-footer no-margin-top">
+										<button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="width: 70px;">取消</button>
+										<button id="btn-modal-lang-save" type="button" class="btn btn-sm btn-primary" data-loading-text="提交中..." style="min-width: 70px;">保存</button>
+									</div>
+									</form>
+								</div><!-- /.modal-content -->
+							</div><!-- /.modal-dialog -->
+						</div>
+						{{end}}
+
+					</div><!-- /.page-content -->
+				</div>
+			</div><!-- /.main-content -->
+			{{ template "foot.html" .}}
+
+		<!-- custom scripts -->
+		<script type="text/javascript">
+			$(document).ready(function(){
+				  createImageElement();
+			});
+			
+			$('#modal-edit').on('shown.bs.modal', function (event) {
+				//设置弹出框第一个显示的input获取焦点
+				setFirstInputFocus($(this))
+			});
+			$('#modal-edit-lang').on('shown.bs.modal', function (event) {
+				//设置弹出框第一个显示的input获取焦点
+				setFirstInputFocus($(this))
+			});
+
+			$('#btn-search').on('click', function(e) {
+				$('#pageNo').val(1);
+				$('#cmd').val('list_search');
+				$("#mainform").submit();
+			});
+
+			$('#btn-del').on(ace.click_event, function() {
+				var arr_no = [];
+				$("input[name='selectNo']").each(function(){
+					if ($(this).is(':checked')) {
+						arr_no.push($(this).val());
+					}
+				});
+
+				if (arr_no.length == 0) {
+					showAlertDialog('请最少选择一条数据！');
+					return false;
+				}
+				bootbox.confirm("确定要删除数据吗？", function (result) {
+					if (result) {
+						$('#cmd').val('list_del');
+						$("#mainform").submit();
+					}
+				});
+			});
+
+			$('#btn-download').on('click', function(e) {
+				$('#cmd').val('list_download');
+				$("#mainform").submit();
+			});
+
+			$('#modal-edit').on('show.bs.modal', function (event) {
+				var modal = $(this);
+				var button = $(event.relatedTarget) // Button that triggered the modal
+				//var recipient = button.data('whatever') // Extract info from data-* attributes
+
+				if(typeof($(button).attr("id")) == "undefined")
+					return;
+
+				clearModalValue(modal);
+				clearModalError(modal);
+
+				if ($(button).attr("id") == 'btn-add') {
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+					modal.find('.modal-title').text('新增商品')
+					treeview.setValue('');
+					modal.find('#modal-itemstatus1').attr("checked","checked");
+					modal.find('#modal-iteminfo').val('1');
+					modal.find('#modal-editor').html('');
+				} else if ($(button).attr("id") == 'btn-edit') {
+					var arr_no = [];
+					$("input[name='selectNo']").each(function(){
+						if ($(this).is(':checked')) {
+							arr_no.push($(this).val());
+						}
+					});
+
+					var errmsg = '';
+					if (arr_no.length == 0)
+						errmsg = '请选择一条数据！';
+					else if (arr_no.length > 1)
+						errmsg = '只能选择一条数据！';
+
+					if (errmsg != '') {
+						showAlertDialog(errmsg);
+						return false;
+					}
+
+					showEdit(modal, arr_no[0]);
+
+				} else if ($(button).attr("id").indexOf('btn-edit-') == 0 || 
+							$(button).attr("id").indexOf('btn-edit2-') == 0) {
+					var selectNo = $(button).data("selectno");
+					if (selectNo == null || selectNo == '') {
+						showAlertDialog('未知错误！');
+						return false;
+					}
+
+					showEdit(modal, selectNo);
+				} else {
+					modal.modal('hide');
+					showAlertDialog('系统错误！');
+				}
+			});
+
+			$('#btn-modal-save').on(ace.click_event, function() {
+				var modal = $('#modal-edit');
+				var btn = $(this);
+				btn.button('loading');
+
+				modal.find('#modal-iteminfo').val($('#modal-iteminfo').html());
+
+				var data = removeKeyModal($('#modalform').serializeObject());
+				if ($('#modal-itemno').val() == '')
+					data['cmd'] = 'ajax_add';
+				else
+					data['cmd'] = 'ajax_edit';
+				console.log(data);
+	return;
+				ajaxPost(window.location.pathname, data, function(obj){
+					btn.button('reset');
+
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret == 1000) {
+						showModalError(obj.error, modal);
+						return;
+					} else if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.modal('hide');
+					$('#cmd').val('list_search');
+					$("#mainform").submit();
+				});
+			});
+
+			function showEdit(modal,value) {
+
+				modal.find('.modal-progress').show();
+				modal.find('.modal-content').hide();
+
+				var data = {"cmd":"ajax_detail", "searchNo":value};
+				ajaxPost(window.location.pathname, data, function(obj){
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+
+					modal.find('.modal-title').text('编辑商品：' + obj.data.ItemName);
+
+					showModalValue(obj.data, modal);
+				});
+			}
+
+			//必须在外部，否则html元素那边无法调用
+			function delSubmit(value) {
+				if (value == null || value == '') {
+					showAlertDialog('请选择一条数据！');
+					return false;
+				}
+
+				bootbox.confirm("确定要删除数据吗？", function (result) {
+					if (result) {
+						$('#searchNo').val(value);
+						$('#cmd').val('list_del');
+						$("#mainform").submit();
+					}
+				});
+				return false;
+			}
+			
+			//tree
+			var treeview = $("#modal-edit #modal-itemclassno").ktreeview({
+				data: {{ .data.res_class }}
+			}, function (data) {
+				//console.log(data);
+				//console.log(treeview.getName());
+				//console.log(treeview.getValue());
+			});
+			
+			//image
+			function checkAndCreateImageInput() {
+				var oldImgNum = $("#modal-edit input[name='modal-filepath']").length;
+				var newImgNum = $("#modal-edit input[name='modal-file']").length;
+				if (oldImgNum + newImgNum >= 5) {
+					return;
+				}
+				if (newImgNum > 0) {
+					var elemnt = $("#modal-edit input[name='modal-file']").eq(newImgNum - 1);
+					if (typeof(elemnt.data('ace_input_files')) == 'undefined')
+						return;
+				}
+				
+				createImageElement();
+			}
+			
+			function createImageElement() {
+				var id = (new Date().getTime());
+				var html = '<div id="div-' + id + '" style="float: left;width: 62px;height: 62px;margin-right: 15px;padding-top: 5px;">';
+				html += '<input type="file" name="modal-file" id="file-' + id + '"></div>';
+				$("#modal-edit #div-images").append(html);
+				
+				$('#file-' + id).ace_file_input({
+					style: 'well',
+					btn_choose: '+',
+					btn_change: null,
+					no_icon: '',//ace-icon fa fa-picture-o
+					allowExt: ["jpeg", "jpg", "png" , "gif"],
+					allowMime: ["image/jpg", "image/jpeg", "image/png", "image/gif"],
+					droppable: false,
+					thumbnail: 'small',//small large | fit
+					multiple: false,
+					maxSize: 1 * 1024 * 1024,
+					//,icon_remove:null//set null, to hide remove/reset button
+					before_change:function(files, dropped) {
+						//Check an example below
+						//or examples/file-upload.html
+						console.log('before_change');
+						return true;
+					},
+					before_remove : function() {
+						var num = $("#modal-edit input[name='modal-file']").length;
+						if (num > 1) {
+							var id = $(this).attr('id');
+							$('#div-' + id.substr(5)).remove();
+						}
+						
+						return true;
+					},
+					preview_error : function(filename, error_code) {
+						//name of the file that failed
+						//error_code values
+						//1 = 'FILE_LOAD_FAILED',
+						//2 = 'IMAGE_LOAD_FAILED',
+						//3 = 'THUMBNAIL_FAILED'
+						//alert(error_code);
+						console.log('preview_error');
+					}
+				}).on('change', function(files, dropped){
+					//console.log($(this).data('ace_input_files'));
+					//console.log($(this).data('ace_input_method'));
+					//console.log(files);
+					console.log('change');
+					checkAndCreateImageInput();
+					
+					var id = $(this).attr('id');
+					$('#div-' + id.substr(5)).css({'paddingTop':0});
+							
+				}).on('file.error.ace', function(event, info) {
+					showAlertDialog('图片格式不正确！(jpg/jpeg/png/gif)');
+				});
+			}
+			
+			//ace_wysiwyg
+			$('#modal-editor').ace_wysiwyg({
+				toolbar:
+				[
+					'font',
+					null,
+					'fontSize',
+					null,
+					{name:'bold', className:'btn-info'},
+					{name:'italic', className:'btn-info'},
+					{name:'strikethrough', className:'btn-info'},
+					{name:'underline', className:'btn-info'},
+					null,
+					{name:'insertunorderedlist', className:'btn-success'},
+					{name:'insertorderedlist', className:'btn-success'},
+					{name:'outdent', className:'btn-purple'},
+					{name:'indent', className:'btn-purple'},
+					null,
+					{name:'justifyleft', className:'btn-primary'},
+					{name:'justifycenter', className:'btn-primary'},
+					{name:'justifyright', className:'btn-primary'},
+					{name:'justifyfull', className:'btn-inverse'},
+					null,
+					{name:'createLink', className:'btn-pink'},
+					{name:'unlink', className:'btn-pink'},
+					null,
+					{name:'insertImage', className:'btn-success'},
+					null,
+					'foreColor',
+					null,
+					{name:'undo', className:'btn-grey'},
+					{name:'redo', className:'btn-grey'}
+				],
+				'wysiwyg': {
+					fileUploadError: function (reason, detail) {
+						var msg = '未知错误！';
+						if (reason === 'unsupported-file-type') { 
+							msg = '文件格式不正确！';
+						} else if (reason === 'file-error') {
+							msg = detail;
+						}
+						showAlertDialog(msg);
+					}
+				}
+			}).prev().addClass('wysiwyg-style2');
+			
+			//RESIZE IMAGE
+			
+			//Add Image Resize Functionality to Chrome and Safari
+			//webkit browsers don't have image resize functionality when content is editable
+			//so let's add something using jQuery UI resizable
+			//another option would be opening a dialog for user to enter dimensions.
+			if ( typeof jQuery.ui !== 'undefined' && ace.vars['webkit'] ) {
+				
+				var lastResizableImg = null;
+				function destroyResizable() {
+					if(lastResizableImg == null) return;
+					lastResizableImg.resizable( "destroy" );
+					lastResizableImg.removeData('resizable');
+					lastResizableImg = null;
+				}
+		
+				var enableImageResize = function() {
+					$('.wysiwyg-editor')
+					.on('mousedown', function(e) {
+						var target = $(e.target);
+						if( e.target instanceof HTMLImageElement ) {
+							if( !target.data('resizable') ) {
+								target.resizable({
+									aspectRatio: e.target.width / e.target.height,
+								});
+								target.data('resizable', true);
+								
+								if( lastResizableImg != null ) {
+									//disable previous resizable image
+									lastResizableImg.resizable( "destroy" );
+									lastResizableImg.removeData('resizable');
+								}
+								lastResizableImg = target;
+							}
+						}
+					})
+					.on('click', function(e) {
+						if( lastResizableImg != null && !(e.target instanceof HTMLImageElement) ) {
+							destroyResizable();
+						}
+					})
+					.on('keydown', function() {
+						destroyResizable();
+					});
+			    }
+		
+				enableImageResize();
+			}
+
+			//language
+			$('#modal-edit-lang').on('show.bs.modal', function (event) {
+				var modal = $(this);
+				var button = $(event.relatedTarget) // Button that triggered the modal
+				//var recipient = button.data('whatever') // Extract info from data-* attributes
+
+				clearModalValue(modal);
+				clearModalError(modal);
+
+				var selectNo = $(button).data("selectno");
+				if (selectNo == null || selectNo == '') {
+					showAlertDialog('未知错误！');
+					return false;
+				}
+
+				modal.find('#modal-langcode').val($(button).data("lang"));
+
+				showEditLang(modal, selectNo, $(button).data("lang"), $(button).html());
+			});
+			
+			//language
+			function showEditLang(modal,value, langcode, langname) {
+
+				modal.find('.modal-progress').show();
+				modal.find('.modal-content').hide();
+
+				var data = {"cmd":"ajax_detail_lang", "searchNo":value, "langcode":langcode};
+				ajaxPost(window.location.pathname, data, function(obj){
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+					if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+
+					modal.find('.modal-title').text(langname + '：' + obj.sData.ItemName);
+
+					showModalValue(obj.data, modal);
+				});
+			}
+
+			$('#btn-modal-lang-save').on(ace.click_event, function() {
+				var modal = $('#modal-edit-lang');
+				var btn = $(this);
+				btn.button('loading');
+
+				var data = removeKeyModal($('#modallangform').serializeObject());
+				if (modal.find('#modal-itemno').val() == '' ||
+					modal.find('#modal-langcode').val() == '') {
+					showAlertDialog('服务器发生未知错误！');
+					return;
+				}
+				data['cmd'] = 'ajax_edit_lang';
+
+				ajaxPost(window.location.pathname, data, function(obj){
+					btn.button('reset');
+
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret == 1000) {
+						showModalError(obj.error, modal);
+						return;
+					} else if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.modal('hide');
+					btn.button('reset');
+				});
+			});
+
+		</script>
+	</body>
+</html>
+{{ end }}

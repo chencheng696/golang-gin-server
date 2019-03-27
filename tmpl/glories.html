@@ -1,0 +1,226 @@
+{{ define "glories.html" }}
+{{ template "head.html" .}}
+		<div class="main-container ace-save-state" id="main-container">
+			
+			{{ template "left.html" .}}
+
+			<div class="main-content">
+				<div class="main-content-inner">
+					
+					{{ template "breadcrumbs.html" .}}
+					
+					<div class="page-content no-padding-bottom">
+						
+						<form id="mainform" name="mainform" method="post" action="" enctype="multipart/form-data">
+							<input type="hidden" id="cmd" name="cmd" value="">
+							<input type="hidden" id="langcode" name="langcode" value="{{ .data.langcode }}">
+							<input type="hidden" id="content" name="content" value="">
+
+						<div class="page-header" id="div-search" style="{{ if ne (mapValue .cookie "cookie_show_search") "1" }}display: none;{{ end }}">
+							<div class="clearfix">
+								<div class="col-xs-12 col-sm-4" style="padding-left: 0px;">
+									<div class="input-group">
+										<span class="input-group-addon">标题</span>
+
+										<input type="text" name="searchName" class="form-control search-query" placeholder="" value="{{ .data.searchName }}" />
+									</div>
+								</div>
+								<div class="col-xs-12" style="width: 100px;">
+									<span class="input-group-btn">
+										<button type="button" class="btn btn-purple btn-sm" id="btn-search">
+											<span class="ace-icon fa fa-search icon-on-right bigger-110"></span>
+											Search
+										</button>
+									</span>
+								</div>
+							</div>
+						</div><!-- /.page-header -->
+
+						<div class="row">
+							<div class="col-xs-12">
+								<div class="col-sm-12 text-danger no-padding center red">{{ .error.commomMsg }}</div>
+								<!-- PAGE CONTENT BEGINS -->
+								<h4 class="header green clearfix">
+									公司荣誉
+									<span class="block pull-right">
+										{{ if gt (len $.app.languages) 0 }}
+										<small class="grey middle">多语言: &nbsp;</small>
+
+										<span class="btn-toolbar inline middle no-margin">
+											<span data-toggle="buttons" class="btn-group no-margin">
+												<label class="btn btn-sm btn-yellow {{ if eq $.data.langcode "" }}active{{ end }}">
+													默认中文
+													<input type="radio" value="" />
+												</label>
+												{{range $j, $w := $.app.languages}}
+												<label class="btn btn-sm btn-yellow {{ if eq $.data.langcode $j }}active{{ end }}">
+													{{$w}}
+													<input type="radio" value="{{ $j }}" />
+												</label>
+												{{end}}
+											</span>
+										</span>
+										{{end}}
+										<button id="btn-save" class="btn btn-sm btn-danger" style="width: 100px;" data-loading-text="提交中...">保存</button>
+									</span>
+								</h4>
+
+								<div class="wysiwyg-editor" style="overflow:scroll;height: 800px;max-height: 800px;" id="editor1"></div>
+
+								<!-- PAGE CONTENT ENDS -->
+							</div><!-- /.col -->
+						</div><!-- /.row -->
+					</div><!-- /.page-content -->
+				</div>
+			</div><!-- /.main-content -->
+			{{ template "foot.html" .}}
+
+		<!-- custom scripts -->
+		<!-- inline scripts related to this page -->
+		<script type="text/javascript">
+			jQuery(function($){
+				
+				//but we want to change a few buttons colors for the third style
+				$('#editor1').ace_wysiwyg({
+					toolbar:
+					[
+						'font',
+						null,
+						'fontSize',
+						null,
+						{name:'bold', className:'btn-info'},
+						{name:'italic', className:'btn-info'},
+						{name:'strikethrough', className:'btn-info'},
+						{name:'underline', className:'btn-info'},
+						null,
+						{name:'insertunorderedlist', className:'btn-success'},
+						{name:'insertorderedlist', className:'btn-success'},
+						{name:'outdent', className:'btn-purple'},
+						{name:'indent', className:'btn-purple'},
+						null,
+						{name:'justifyleft', className:'btn-primary'},
+						{name:'justifycenter', className:'btn-primary'},
+						{name:'justifyright', className:'btn-primary'},
+						{name:'justifyfull', className:'btn-inverse'},
+						null,
+						{name:'createLink', className:'btn-pink'},
+						{name:'unlink', className:'btn-pink'},
+						null,
+						{name:'insertImage', className:'btn-success'},
+						null,
+						'foreColor',
+						null,
+						{name:'undo', className:'btn-grey'},
+						{name:'redo', className:'btn-grey'}
+					],
+					'wysiwyg': {
+						fileUploadError: function (reason, detail) {
+							var msg = '未知错误！';
+							if (reason === 'unsupported-file-type') { 
+								msg = '文件格式不正确！';
+							} else if (reason === 'file-error') {
+								msg = detail;
+							}
+							showAlertDialog(msg);
+						}
+					}
+				}).prev().addClass('wysiwyg-style2');
+			
+				$('[data-toggle="buttons"] .btn').on('click', function(e){
+					var target = $(this).find('input[type=radio]');
+					/*var which = parseInt(target.val());
+					var toolbar = $('#editor1').prev().get(0);
+					if(which >= 1 && which <= 4) {
+						toolbar.className = toolbar.className.replace(/wysiwyg\-style(1|2)/g , '');
+						if(which == 1) $(toolbar).addClass('wysiwyg-style1');
+						else if(which == 2) $(toolbar).addClass('wysiwyg-style2');
+						if(which == 4) {
+							$(toolbar).find('.btn-group > .btn').addClass('btn-white btn-round');
+						} else $(toolbar).find('.btn-group > .btn-white').removeClass('btn-white btn-round');
+					}*/
+					$('#langcode').val(target.val());
+					$("#mainform").submit();
+				});
+			
+				//RESIZE IMAGE
+				
+				//Add Image Resize Functionality to Chrome and Safari
+				//webkit browsers don't have image resize functionality when content is editable
+				//so let's add something using jQuery UI resizable
+				//another option would be opening a dialog for user to enter dimensions.
+				if ( typeof jQuery.ui !== 'undefined' && ace.vars['webkit'] ) {
+					console.log('aaaa');
+					var lastResizableImg = null;
+					function destroyResizable() {
+						if(lastResizableImg == null) return;
+						lastResizableImg.resizable( "destroy" );
+						lastResizableImg.removeData('resizable');
+						lastResizableImg = null;
+					}
+			
+					var enableImageResize = function() {
+						$('.wysiwyg-editor')
+						.on('mousedown', function(e) {
+							var target = $(e.target);
+							if( e.target instanceof HTMLImageElement ) {
+								if( !target.data('resizable') ) {
+									target.resizable({
+										aspectRatio: e.target.width / e.target.height,
+									});
+									target.data('resizable', true);
+									
+									if( lastResizableImg != null ) {
+										//disable previous resizable image
+										lastResizableImg.resizable( "destroy" );
+										lastResizableImg.removeData('resizable');
+									}
+									lastResizableImg = target;
+								}
+							}
+						})
+						.on('click', function(e) {
+							if( lastResizableImg != null && !(e.target instanceof HTMLImageElement) ) {
+								destroyResizable();
+							}
+						})
+						.on('keydown', function() {
+							destroyResizable();
+						});
+				    }
+			
+					enableImageResize();
+			
+					/**
+					//or we can load the jQuery UI dynamically only if needed
+					if (typeof jQuery.ui !== 'undefined') enableImageResize();
+					else {//load jQuery UI if not loaded
+						//in Ace demo ./components will be replaced by correct components path
+						$.getScript("assets/js/jquery-ui.custom.min.js", function(data, textStatus, jqxhr) {
+							enableImageResize()
+						});
+					}
+					*/
+				}
+			
+			
+			});
+			
+		$(document).ready(function(){
+			var toolbar = $('#editor1').prev().get(0);
+			toolbar.className = toolbar.className.replace(/wysiwyg\-style(1|2)/g , '');
+			$(toolbar).find('.btn-group > .btn').addClass('btn-white btn-round');
+			$('#editor1').focus();
+			$('#editor1').html({{ .data.content }})
+		});
+	
+		$('#btn-save').on('click', function(e) {
+			$(this).button('loading');
+			$('#cmd').val('edit_save');
+			$('#content').val($('#editor1').html());
+			$("#mainform").submit();
+			return false;
+		});
+		</script>
+	</body>
+</html>
+{{ end }}

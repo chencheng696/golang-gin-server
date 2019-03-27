@@ -1,0 +1,21 @@
+.modal-progress{
+	z-index: 20000; 
+	position: absolute; 
+	text-align: center; 
+	left: 50%; 
+	top: 50%;
+}
+
+.modal-ellipsis{
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.dd #nestable > div.dd2-content > .action-buttons{
+	display: none;
+}
+
+.dd #nestable > div.dd2-content > .action-buttons:hover{
+	display: block;
+}

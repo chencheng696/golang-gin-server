@@ -1,0 +1,423 @@
+{{ define "admin.html" }}
+{{ template "head.html" .}}
+		<div class="main-container ace-save-state" id="main-container">
+			
+			{{ template "left.html" .}}
+
+			<div class="main-content">
+				<div class="main-content-inner">
+					
+					{{ template "breadcrumbs.html" .}}
+
+					<div class="page-content no-padding-bottom">
+
+						<form id="mainform" name="mainform" method="post" action="" enctype="multipart/form-data">
+							<input type="hidden" id="cmd" name="cmd" value="">
+							<input type="hidden" id="searchNo" name="searchNo" value="">
+							<input type="file" id="uploadFile" name="uploadFile" style="display: none;">
+
+						<div class="page-header" id="div-search" style="{{ if ne (mapValue .cookie "cookie_show_search") "1" }}display: none;{{ end }}">
+							<div class="clearfix">
+								<div class="col-xs-12 col-sm-4" style="padding-left: 0px;">
+									<div class="input-group">
+										<span class="input-group-addon">管理员ID</span>
+
+										<input type="text" name="searchId" class="form-control search-query" placeholder="" value="{{ .data.searchId }}" />
+									</div>
+								</div>
+								<div class="col-xs-12 col-sm-4" style="padding-left: 0px;">
+									<div class="input-group">
+										<span class="input-group-addon">管理员名字</span>
+
+										<input type="text" name="searchName" class="form-control search-query" placeholder="" value="{{ .data.searchName }}" />
+									</div>
+								</div>
+								<div class="col-xs-12" style="width: 100px;">
+									<span class="input-group-btn">
+										<button type="button" class="btn btn-purple btn-sm" id="btn-search">
+											<span class="ace-icon fa fa-search icon-on-right bigger-110"></span>
+											Search
+										</button>
+									</span>
+								</div>
+							</div>
+						</div><!-- /.page-header -->
+
+						<div class="row">
+							<div class="col-xs-12">
+								<div class="col-sm-12 text-danger no-padding">{{ .error.commomMsg }}</div>
+								<div class="col-sm-12 text-danger no-padding">{{ .error.uploadFile }}</div>
+								<!-- PAGE CONTENT BEGINS -->
+								<div class="row">
+									<div class="col-xs-12">
+										<div class="clearfix">
+											<div class="pull-left tableTools-container">
+												<button id="btn-add" type="button" class="btn btn-white btn-default btn-bold" data-toggle="modal" data-target="#modal-edit" data-backdrop="static" data-keyboard="false">
+													<i class="fa fa-plus bigger-110 blue"></i>
+													新增
+												</button>
+												<button id="btn-edit" type="button" class="btn btn-white btn-default btn-bold" data-toggle="modal" data-target="#modal-edit" data-backdrop="static" data-keyboard="false">
+													<i class="fa fa-edit bigger-110 pink"></i> 
+													编辑
+												</button>
+												<button id="btn-del" type="button" class="btn btn-white btn-danger btn-bold">
+													<i class="fa fa-trash-o bigger-110 red"></i> 
+													删除
+												</button>
+												<button id="btn-download" type="button" class="btn btn-white btn-default btn-bold">
+													<i class="fa fa-download bigger-110 orange"></i> 
+													下载
+												</button>
+												<button id="btn-upload" type="button" class="btn btn-white btn-default btn-bold">
+													<i class="fa fa-upload bigger-110 orange2"></i> 
+													导入
+												</button>
+												<button id="btn-print" type="button" class="btn btn-white btn-default btn-bold">
+													<i class="fa fa-print bigger-110 grey"></i> 
+													打印
+												</button>
+											</div>
+											{{ template "page.html" .}}
+										</div>
+										<table id="main-table" class="table  table-bordered table-hover no-margin-bottom">
+											<thead>
+												<tr>
+													<th class="center" style="width: 40px;">
+														<label class="pos-rel">
+															<input type="checkbox" class="ace" />
+															<span class="lbl"></span>
+														</label>
+													</th>
+													<th class="detail-col">No.</th>
+													<th>ID</th>
+													<th>名字</th>
+													<th style="width: 100px;">权限</th>
+													<th style="width: 140px;">创建时间</th>
+													<th style="width: 140px;">更新时间</th>
+													<th style="width: 70px;"></th>
+												</tr>
+											</thead>
+
+											<tbody>
+												{{range $i, $v := .data.res}}
+												<tr>
+													<td class="center">
+														<label class="pos-rel">
+															<input name="selectNo" type="checkbox" class="ace" value="{{ $v.AdmNo }}"/>
+															<span class="lbl"></span>
+														</label>
+													</td>
+
+													<td class="center">{{ multAdd $i 1 (multTimes (multMinus $.common.pageNo 1) $.common.pageRow) }}</td>
+
+													<td>{{ $v.AdmId }}</td>
+													<td>{{ $v.AdmName }}</td>
+													<td>{{ if eq $v.AdmPerm `0` }}超级管理员{{ else }}普通管理员{{end}}</td>
+													<td>{{ formatAsDate $v.AdmInputdate `yyyy-MM-dd hh:mm:ss`}}</td>
+													<td>{{ formatAsDate $v.AdmUpdate `yyyy-MM-dd hh:mm:ss`}}</td>
+													
+													<td>
+														<div class="btn-group">
+															<button id="btn-edit-{{ $v.AdmNo }}" type="button" class="btn btn-xs btn-danger" data-selectno="{{ $v.AdmNo }}" data-toggle="modal" data-target="#modal-edit" data-backdrop="static" data-keyboard="false">查看</button>
+															<button type="button" data-toggle="dropdown" class="btn btn-xs btn-danger dropdown-toggle" aria-expanded="false">
+																<span class="ace-icon fa fa-caret-down icon-only"></span>
+															</button>
+
+															<ul class="dropdown-menu dropdown-menu-right dropdown-danger">
+																<li>
+																	<a id="btn-edit2-{{ $v.AdmNo }}" href="#modal-edit" data-selectno="{{ $v.AdmNo }}" data-toggle="modal">编辑</a>
+																</li>
+
+																<li>
+																	<a href="javascript: void(0)" onclick="delSubmit({{ $v.AdmNo }});">删除</a>
+																</li>
+															</ul>
+														</div>
+													</td>
+												</tr>
+												{{end}}
+											</tbody>
+										</table>
+									</div><!-- /.span -->
+								</div><!-- /.row -->
+								<!-- PAGE CONTENT ENDS -->
+							</div><!-- /.col -->
+						</div><!-- /.row -->
+						</form>
+
+						<div id="modal-edit" class="modal fade" tabindex="-1">
+							<div class="modal-progress">
+								<h3 class="smaller lighter grey">
+									<i class="ace-icon fa fa-spinner fa-spin orange bigger-125"></i>
+								</h3>
+							</div>
+							<div class="modal-dialog" style="width: 400px;">
+								<div class="modal-content">
+									<form id="modalform" name="modalform" method="post" action="" enctype="multipart/form-data">
+									<div class="modal-header no-padding">
+										<div class="table-header modal-ellipsis">
+											<button type="button" class="bootbox-close-button close" data-dismiss="modal" aria-hidden="true">
+												<span class="white">&times;</span>
+											</button>
+											<span class="modal-title">新增或编辑</span>
+										</div>
+									</div>
+
+									<div class="modal-body">
+										<div class="row">
+											<div class="col-xs-12 form-horizontal">
+												<input type="hidden" id="modal-admno" name="modal-admno">
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-admid">管理员ID</label>
+													<div class="col-sm-9">
+														<input type="text" id="modal-admid" name="modal-admid" class="col-xs-10 col-sm-12">
+														<div id="errmodal-admid" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group" id="div-adm-pwd-modal">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-admpwd">密码</label>
+													<div class="col-sm-9">
+														<input type="password" id="modal-admpwd" name="modal-admpwd" class="col-xs-10 col-sm-12">
+														<div id="errmodal-admpwd" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group" id="div-adm-pwd2-modal">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-admpwd2">确认密码</label>
+													<div class="col-sm-9">
+														<input type="password" id="modal-admpwd2" name="modal-admpwd2" class="col-xs-10 col-sm-12">
+														<div id="errmodal-admpwd2" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-admname">管理员名字</label>
+													<div class="col-sm-9">
+														<input type="text" id="modal-admname" name="modal-admname" class="col-xs-10 col-sm-12">
+														<div id="errmodal-admname" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-admperm">权限</label>
+													<div class="col-sm-9">
+														<select id="modal-admperm" name="modal-admperm" class="form-control col-xs-10 col-sm-12">
+															<option value="0">超级管理员</option>
+															<option value="1" checked>普通管理员</option>
+														</select>
+														<div id="errmodal-admperm" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+											</div>
+										</div>
+										
+									</div>
+
+									<div class="modal-footer no-margin-top">
+										<button id="btn-modal-cancel" type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="width: 70px;">取消</button>
+										<button id="btn-modal-save" type="button" class="btn btn-sm btn-primary" data-loading-text="提交中..." style="min-width: 70px;">保存</button>
+									</div>
+									</form>
+								</div><!-- /.modal-content -->
+							</div><!-- /.modal-dialog -->
+						</div>
+
+					</div><!-- /.page-content -->
+				</div>
+			</div><!-- /.main-content -->
+			{{ template "foot.html" .}}
+
+		<!-- custom scripts -->
+		<script type="text/javascript">
+			$('#modal-edit').on('shown.bs.modal', function (event) {
+				//设置弹出框第一个显示的input获取焦点
+				setFirstInputFocus($(this))
+			});
+			
+			$('#btn-search').on('click', function(e) {
+				$('#pageNo').val(1);
+				$('#cmd').val('list_search');
+				$("#mainform").submit();
+			});
+
+			$('#btn-del').on(ace.click_event, function() {
+				var arr_no = [];
+				$("input[name='selectNo']").each(function(){
+					if ($(this).is(':checked')) {
+						arr_no.push($(this).val());
+					}
+				});
+
+				if (arr_no.length == 0) {
+					showAlertDialog('请最少选择一条数据！');
+					return false;
+				}
+				bootbox.confirm("确定要删除数据吗？", function (result) {
+					if (result) {
+						$('#cmd').val('list_del');
+						$("#mainform").submit();
+					}
+				});
+			});
+
+			$('#btn-download').on('click', function(e) {
+				$('#cmd').val('list_download');
+				$("#mainform").submit();
+			});
+
+			$('#btn-upload').on('click', function(e) {
+				$('#uploadFile').click();
+			});
+
+			$('#modal-edit').on('show.bs.modal', function (event) {
+				var modal = $(this);
+				var button = $(event.relatedTarget) // Button that triggered the modal
+				//var recipient = button.data('whatever') // Extract info from data-* attributes
+
+				clearModalValue(modal);
+				clearModalError(modal);
+				
+				if ($(button).attr("id") == 'btn-add') {
+					modal.find('#modal-admid').removeAttr('readonly');
+					modal.find('#modal-admperm').val('1');
+					modal.find('#div-adm-pwd-modal').show();
+					modal.find('#div-adm-pwd2-modal').show();
+				} else {
+					modal.find('#modal-admid').attr('readonly', 'true');
+					modal.find('#div-adm-pwd-modal').hide();
+					modal.find('#div-adm-pwd2-modal').hide();
+				}
+
+				if ($(button).attr("id") == 'btn-add') {
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+					modal.find('.modal-title').text('新增管理员')
+				} else if ($(button).attr("id") == 'btn-edit') {
+					var arr_no = [];
+					$("input[name='selectNo']").each(function(){
+						if ($(this).is(':checked')) {
+							arr_no.push($(this).val());
+						}
+					});
+
+					var errmsg = '';
+					if (arr_no.length == 0)
+						errmsg = '请选择一条数据！';
+					else if (arr_no.length > 1)
+						errmsg = '只能选择一条数据！';
+
+					if (errmsg != '') {
+						showAlertDialog(errmsg);
+						return false;
+					}
+
+					showEdit(modal, arr_no[0]);
+
+				} else if ($(button).attr("id").indexOf('btn-edit-') == 0 || 
+							$(button).attr("id").indexOf('btn-edit2-') == 0) {
+					var selectNo = $(button).data("selectno");
+					if (selectNo == null || selectNo == '') {
+						showAlertDialog('未知错误！');
+						return false;
+					}
+
+					showEdit(modal, selectNo);
+				} else {
+					modal.modal('hide');
+					showAlertDialog('系统错误！');
+				}
+			});
+
+			$('#btn-modal-save').on(ace.click_event, function() {
+				var modal = $('#modal-edit');
+				var btn = $(this);
+				btn.button('loading');
+
+				var data = removeKeyModal($('#modalform').serializeObject());
+				if (modal.find('#modal-admno').val() == '')
+					data['cmd'] = 'ajax_add';
+				else
+					data['cmd'] = 'ajax_edit';
+
+				ajaxPost(window.location.pathname, data, function(obj){
+					btn.button('reset');
+
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret == 1000) {
+						showModalError(obj.error, modal);
+						return;
+					} else if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.modal('hide');
+					$('#cmd').val('list_search');
+					$("#mainform").submit();
+				});
+			});
+
+			$('#uploadFile').on('change', function() {
+				$('#cmd').val('list_upload');
+				$("#mainform").submit();
+			});
+
+			function showEdit(modal,value) {
+
+				modal.find('.modal-progress').show();
+				modal.find('.modal-content').hide();
+
+				var data = {"cmd":"ajax_detail", "searchNo":value};
+				ajaxPost(window.location.pathname, data, function(obj){
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+
+					modal.find('.modal-title').text('编辑管理员：' + obj.data.adm_name);
+
+					showModalValue(obj.data, modal);
+				});
+			}
+
+			//必须在外部，否则html元素那边无法调用
+			function delSubmit(value) {
+				if (value == null || value == '') {
+					showAlertDialog('请选择一条数据！');
+					return false;
+				}
+
+				bootbox.confirm("确定要删除数据吗？", function (result) {
+					if (result) {
+						$('#searchNo').val(value);
+						$('#cmd').val('list_del');
+						$("#mainform").submit();
+					}
+				});
+				return false;
+			}
+		</script>
+	</body>
+</html>
+{{ end }}

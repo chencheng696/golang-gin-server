@@ -1,0 +1,249 @@
+{{ define "left.html" }}
+			<div id="sidebar" class="sidebar responsive ace-save-state sidebar-fixed sidebar-scroll">
+				<ul class="nav nav-list">
+					<li class="{{ if eq .common.router "index" }}active{{ end }}">
+						<a href="/index">
+							<i class="menu-icon fa fa-tachometer"></i>
+							<span class="menu-text"> Dashboard </span>
+						</a>
+
+						<b class="arrow"></b>
+					</li>
+
+					<li class="{{ if eq .common.router "admin" }}active{{ end }}">
+						<a href="/admin">
+							<i class="menu-icon fa fa-user"></i>
+							<span class="menu-text"> 管理员 </span>
+						</a>
+
+						<b class="arrow"></b>
+					</li>
+
+					<li class="{{ if eq .common.router "aboutus" "organizational" "glories" "culture" }}active open{{ end }}">
+						<a href="#" class="dropdown-toggle">
+							<i class="menu-icon fa fa-home"></i>
+							<span class="menu-text"> 企业设置 </span>
+
+							<b class="arrow fa fa-angle-down"></b>
+						</a>
+
+						<b class="arrow"></b>
+
+						<ul class="submenu">
+							<li class="{{ if eq .common.router "aboutus" }}active{{ end }}">
+								<a href="/aboutus">
+									<i class="menu-icon fa fa-caret-right"></i>
+									公司简介
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+
+							<li class="{{ if eq .common.router "organizational" }}active{{ end }}">
+								<a href="/organizational">
+									<i class="menu-icon fa fa-caret-right"></i>
+									组织架构
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+
+							<li class="{{ if eq .common.router "glories" }}active{{ end }}">
+								<a href="/glories">
+									<i class="menu-icon fa fa-caret-right"></i>
+									公司荣誉
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+
+							<li class="{{ if eq .common.router "culture" }}active{{ end }}">
+								<a href="/culture">
+									<i class="menu-icon fa fa-caret-right"></i>
+									企业文化
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+						</ul>
+					</li>
+
+					<li class="{{ if eq .common.router "item" "itemclass" }}active open{{ end }}">
+						<a href="#" class="dropdown-toggle">
+							<i class="menu-icon fa fa-list"></i>
+							<span class="menu-text"> 商品管理 </span>
+
+							<b class="arrow fa fa-angle-down"></b>
+						</a>
+
+						<b class="arrow"></b>
+
+						<ul class="submenu">
+							<li class="{{ if eq .common.router "item" }}active{{ end }}">
+								<a href="/item">
+									<i class="menu-icon fa fa-caret-right"></i>
+									商品
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+
+							<li class="{{ if eq .common.router "itemclass" }}active{{ end }}">
+								<a href="/itemclass">
+									<i class="menu-icon fa fa-caret-right"></i>
+									商品分类
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+						</ul>
+					</li>
+
+					<li class="{{ if eq .common.router "news" "newsclass" }}active open{{ end }}">
+						<a href="#" class="dropdown-toggle">
+							<i class="menu-icon fa fa-info"></i>
+							<span class="menu-text"> 新闻管理 </span>
+
+							<b class="arrow fa fa-angle-down"></b>
+						</a>
+
+						<b class="arrow"></b>
+
+						<ul class="submenu">
+							<li class="{{ if eq .common.router "news" }}active{{ end }}">
+								<a href="/news">
+									<i class="menu-icon fa fa-caret-right"></i>
+									新闻
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+
+							<li class="{{ if eq .common.router "newsclass" }}active{{ end }}">
+								<a href="/newsclass">
+									<i class="menu-icon fa fa-caret-right"></i>
+									新闻分类
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+						</ul>
+					</li>
+
+					<li class="{{ if eq .common.router "case" "caseclass" }}active open{{ end }}">
+						<a href="#" class="dropdown-toggle">
+							<i class="menu-icon fa fa-briefcase"></i>
+							<span class="menu-text"> 案例管理 </span>
+
+							<b class="arrow fa fa-angle-down"></b>
+						</a>
+
+						<b class="arrow"></b>
+
+						<ul class="submenu">
+							<li class="{{ if eq .common.router "case" }}active{{ end }}">
+								<a href="#">
+									<i class="menu-icon fa fa-caret-right"></i>
+									案例
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+
+							<li class="{{ if eq .common.router "caseclass" }}active{{ end }}">
+								<a href="#">
+									<i class="menu-icon fa fa-caret-right"></i>
+									案例分类
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+						</ul>
+					</li>
+
+					<li class="{{ if eq .common.router "job" "caseclass" }}active open{{ end }}">
+						<a href="#" class="dropdown-toggle">
+							<i class="menu-icon fa fa-file-o"></i>
+							<span class="menu-text"> 其他 </span>
+
+							<b class="arrow fa fa-angle-down"></b>
+						</a>
+
+						<b class="arrow"></b>
+
+						<ul class="submenu">
+							<li class="{{ if eq .common.router "job" }}active{{ end }}">
+								<a href="/job">
+									<i class="menu-icon fa fa-caret-right"></i>
+									人才招聘
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+
+							<li class="{{ if eq .common.router "visator" }}active{{ end }}">
+								<a href="/visator">
+									<i class="menu-icon fa fa-caret-right"></i>
+									访客留言
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+
+							<li class="{{ if eq .common.router "partners" }}active{{ end }}">
+								<a href="/partners">
+									<i class="menu-icon fa fa-caret-right"></i>
+									合作伙伴
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+
+							<li class="{{ if eq .common.router "promotion" }}active{{ end }}">
+								<a href="/promotion">
+									<i class="menu-icon fa fa-caret-right"></i>
+									网络推广
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+						</ul>
+					</li>
+
+					<li class="{{ if eq .common.router "profile" "system" }}active open{{ end }}">
+						<a href="#" class="dropdown-toggle">
+							<i class="menu-icon fa fa-cog"></i>
+							<span class="menu-text"> 设置 </span>
+
+							<b class="arrow fa fa-angle-down"></b>
+						</a>
+
+						<b class="arrow"></b>
+
+						<ul class="submenu">
+							<li class="{{ if eq .common.router "profile" }}active{{ end }}">
+								<a href="/profile">
+									<i class="menu-icon fa fa-caret-right"></i>
+									个人设置
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+
+							<li class="{{ if eq .common.router "system" }}active{{ end }}">
+								<a href="/system">
+									<i class="menu-icon fa fa-caret-right"></i>
+									系统设置
+								</a>
+
+								<b class="arrow"></b>
+							</li>
+						</ul>
+					</li>
+				</ul><!-- /.nav-list -->
+
+				<div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse">
+					<i id="sidebar-toggle-icon" class="ace-icon fa fa-angle-double-left ace-save-state" data-icon1="ace-icon fa fa-angle-double-left" data-icon2="ace-icon fa fa-angle-double-right"></i>
+				</div>
+			</div>
+{{ end }}

@@ -1,0 +1,162 @@
+{{ define "foot.html" }}
+			<div class="footer">
+				<div class="footer-inner">
+					<div class="footer-content">
+						<span class="bigger-120">
+							XXXX工作室 &copy; 2013-2018
+						</span>
+					</div>
+				</div>
+			</div>
+
+			<a href="#" id="btn-scroll-up" class="btn-scroll-up btn btn-sm btn-inverse">
+				<i class="ace-icon fa fa-angle-double-up icon-only bigger-110"></i>
+			</a>
+		</div><!-- /.main-container -->
+
+		<!-- basic scripts -->
+
+		<!--[if !IE]> -->
+		<script src="assets/js/jquery-2.1.4.min.js?{{ .app.version }}"></script>
+
+		<!-- <![endif]-->
+
+		<!--[if IE]>
+<script src="assets/js/jquery-1.11.3.min.js"></script>
+<![endif]-->
+		<script type="text/javascript">
+			if('ontouchstart' in document.documentElement) document.write("<script src='assets/js/jquery.mobile.custom.min.js?{{ .app.version }}'>"+"<"+"/script>");
+		</script>
+		<script src="assets/js/bootstrap.min.js?{{ .app.version }}"></script>
+
+		<!-- page specific plugin scripts -->
+
+		<!--[if lte IE 8]>
+		  <script src="assets/js/excanvas.min.js"></script>
+		<![endif]-->
+		<script src="assets/js/jquery-ui.custom.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/jquery.ui.touch-punch.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/jquery.hotkeys.index.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/bootstrap-wysiwyg.js?{{ .app.version }}"></script>
+		<script src="assets/js/bootstrap-datepicker.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/bootstrap-timepicker.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/bootstrap-treeview.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/bootbox.js?{{ .app.version }}"></script>
+		<script src="assets/js/jquery.easypiechart.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/jquery.sparkline.index.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/jquery.flot.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/jquery.flot.pie.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/jquery.flot.resize.min.js?{{ .app.version }}"></script>
+
+		<!-- page specific plugin scripts -->
+		<script src="assets/js/jquery.dataTables.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/jquery.dataTables.bootstrap.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/dataTables.buttons.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/buttons.flash.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/buttons.html5.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/buttons.print.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/buttons.colVis.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/dataTables.select.min.js?{{ .app.version }}"></script>
+
+		<!-- ace scripts -->
+		<script src="assets/js/ace-elements.min.js?{{ .app.version }}"></script>
+		<script src="assets/js/ace.min.js?{{ .app.version }}"></script>
+
+		<script src="assets/js/common.js?{{ .app.version }}"></script>
+		<script src="assets/js/jquery.cookie.js?{{ .app.version }}"></script>
+		<script src="assets/js/ktreeview.js?{{ .app.version }}"></script>
+
+		<!-- inline scripts related to this page -->
+		<script type="text/javascript">
+			jQuery(function($) {
+				//initiate dataTables plugin
+				/////////////////////////////////
+				//table checkboxes
+				$('th input[type=checkbox], td input[type=checkbox]').prop('checked', false);
+
+				
+				//And for the first simple table, which doesn't have TableTools or dataTables
+				//select/deselect all rows according to table header checkbox
+				var active_class = 'active';
+				$('#main-table > thead > tr > th input[type=checkbox]').eq(0).on('click', function(){
+					var th_checked = this.checked;//checkbox inside "TH" table header
+					
+					$(this).closest('table').find('tbody > tr').each(function(){
+						var row = this;
+						if(th_checked) $(row).addClass(active_class).find('input[type=checkbox]').eq(0).prop('checked', true);
+						else $(row).removeClass(active_class).find('input[type=checkbox]').eq(0).prop('checked', false);
+					});
+				});
+				
+				//select/deselect a row when the checkbox is checked/unchecked
+				$('#main-table').on('click', 'td input[type=checkbox]' , function(){
+					var $row = $(this).closest('tr');
+					if($row.is('.detail-row ')) return;
+					if(this.checked) $row.addClass(active_class);
+					else $row.removeClass(active_class);
+				});
+			
+				
+			
+				/********************************/
+				//add tooltip for small view action buttons in dropdown menu
+				$('[data-rel="tooltip"]').tooltip({placement: tooltip_placement});
+				
+				//tooltip placement on right or left
+				function tooltip_placement(context, source) {
+					var $source = $(source);
+					var $parent = $source.closest('table')
+					var off1 = $parent.offset();
+					var w1 = $parent.width();
+			
+					var off2 = $source.offset();
+					//var w2 = $source.width();
+			
+					if( parseInt(off2.left) < parseInt(off1.left) + parseInt(w1 / 2) ) return 'right';
+					return 'left';
+				}
+				
+				$.fn.serializeObject = function() {  
+			        var o = {};  
+			        var a = this.serializeArray();  
+			        $.each(a, function() {  
+			            if (o[this.name]) {  
+			                if (!o[this.name].push) {  
+			                    o[this.name] = [ o[this.name] ];  
+			                }  
+			                o[this.name].push(this.value || '');  
+			            } else {  
+			                o[this.name] = this.value || '';  
+			            }  
+			        });  
+			        return o;
+			    }
+
+			    $('#btn-search-toggle').on('click', function(){
+			    	var btn = this;
+			    	$('#div-search').toggle(200, function(){
+			    		if ($(this).is(':hidden')) {
+			    			//$(btn).find('span').html('显示检索');
+			    			$(btn).removeClass('btn-white');
+			    			$(btn).find('i').removeClass('fa-arrow-up');
+			    			$(btn).find('i').addClass('fa-arrow-down');
+
+			    			$.cookie('cookie_show_search', '0');
+			    		} else {
+			    			//$(btn).find('span').html('隐藏检索');
+			    			$(btn).addClass('btn-white');
+			    			$(btn).find('i').addClass('fa-arrow-up');
+			    			$(btn).find('i').removeClass('fa-arrow-down');
+
+			    			$.cookie('cookie_show_search', '1');
+			    		}
+			    	});
+			    });
+			})
+		</script>
+		<style type="text/css">
+			#btn-search-toggle:focus{
+				outline:none
+			}
+		</style>
+{{ end }}

@@ -1,0 +1,553 @@
+{{ define "newsclass.html" }}
+{{ template "head.html" .}}
+		<div class="main-container ace-save-state" id="main-container">
+
+			{{ template "left.html" .}}
+
+			<div class="main-content">
+				<div class="main-content-inner">
+
+					{{ template "breadcrumbs.html" .}}
+
+					<div class="page-content no-padding-bottom">
+
+						<form id="mainform" name="mainform" method="post" action="" enctype="multipart/form-data">
+							<input type="hidden" id="cmd" name="cmd" value="">
+							<input type="hidden" id="searchNo" name="searchNo" value="">
+
+						<div class="row">
+							<div class="col-xs-12">
+								<!-- PAGE CONTENT BEGINS -->
+
+								<div class="row">
+									<div class="col-sm-6">
+										<div class="widget-box widget-color-blue2">
+											<div class="widget-header">
+												<h4 class="widget-title lighter smaller">新闻分类</h4>
+												<a class="white" id="btn-add" href="#modal-edit" data-toggle="modal" style="float: right;line-height: 36px;margin-right: 10px;" data-selectno="0">
+													<i class="ace-icon fa fa-plus bigger-130"></i>
+												</a>
+											</div>
+											<div class="widget-body">
+												<div class="widget-main padding-8">
+													<ul id="tree" class="tree tree-unselectable" role="tree" style="overflow: visible;">
+														<li class="tree-branch hide" data-template="treebranch" role="treenews" aria-expanded="false">
+															<div class="tree-branch-header">
+																<span class="tree-branch-name">
+																	<i class="icon-folder ace-icon tree-plus"></i>
+																	<span class="tree-label"></span>
+																</span>
+															</div>
+															<ul class="tree-branch-children" role="group"></ul>
+														</li>
+														<li class="tree-news hide" data-template="treenews" role="treenews">
+															<span class="tree-news-name">
+																<span class="tree-label"></span>
+															</span>
+														</li>
+													</ul>
+													<div class="tree-loader" role="alert">
+														<div class="tree-loading" style="position: relative;left: 50%;">
+															<i class="ace-icon fa fa-refresh fa-spin blue"></i>
+														</div>
+													</div><!-- /.loading -->
+												</div>
+											</div>
+										</div><!-- /.tree -->
+									</div>
+								</div>
+
+								<!-- PAGE CONTENT ENDS -->
+							</div><!-- /.col -->
+						</div><!-- /.row -->
+						</form>
+
+						<div id="modal-edit" class="modal fade" tabindex="-1">
+							<div class="modal-progress">
+								<h3 class="smaller lighter grey">
+									<i class="ace-icon fa fa-spinner fa-spin orange bigger-125"></i>
+								</h3>
+							</div>
+							<div class="modal-dialog" style="width: 400px;">
+								<div class="modal-content">
+									<form id="modalform" name="modalform" method="post" action="" enctype="multipart/form-data">
+									<div class="modal-header no-padding">
+										<div class="table-header modal-ellipsis">
+											<button type="button" class="bootbox-close-button close" data-dismiss="modal" aria-hidden="true">
+												<span class="white">&times;</span>
+											</button>
+											<span class="modal-title">新增或编辑</span>
+										</div>
+									</div>
+
+									<div class="modal-body">
+										<div class="row">
+											<div class="col-xs-12 form-horizontal">
+												<input type="hidden" id="modal-newsclassno" name="modal-newsclassno">
+												<input type="hidden" id="modal-newsclassparentno" name="modal-newsclassparentno">
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-newsclassname">分类名称</label>
+													<div class="col-sm-9">
+														<input type="text" id="modal-newsclassname" name="modal-newsclassname" class="col-xs-10 col-sm-12">
+														<div id="errmodal-newsclassname" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-newsclassparentname">所属分类</label>
+													<label class="col-sm-9 control-label no-padding-right" id="modal-newsclassparentname" style="text-align: left;font-weight: bold;">无</label>
+												</div>
+											</div>
+										</div>
+										
+									</div>
+
+									<div class="modal-footer no-margin-top">
+										<button id="btn-modal-cancel" type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="width: 70px;">取消</button>
+										<button id="btn-modal-save" type="button" class="btn btn-sm btn-primary" data-loading-text="提交中..." style="min-width: 70px;">保存</button>
+									</div>
+									</form>
+								</div><!-- /.modal-content -->
+							</div><!-- /.modal-dialog -->
+						</div>
+
+						{{ if gt (len $.app.languages) 0 }}
+						<!-- language -->
+						<div id="modal-edit-lang" class="modal fade" tabindex="-1">
+							<div class="modal-progress">
+								<h3 class="smaller lighter grey">
+									<i class="ace-icon fa fa-spinner fa-spin orange bigger-125"></i>
+								</h3>
+							</div>
+							<div class="modal-dialog" style="width: 400px;">
+								<div class="modal-content">
+									<form id="modallangform" name="modallangform" method="post" action="" enctype="multipart/form-data">
+									<div class="modal-header no-padding">
+										<div class="table-header modal-ellipsis">
+											<button type="button" class="bootbox-close-button close" data-dismiss="modal" aria-hidden="true">
+												<span class="white">&times;</span>
+											</button>
+											<span class="modal-title">多语言</span>
+										</div>
+									</div>
+
+									<div class="modal-body">
+										<div class="row">
+											<div class="col-xs-12 form-horizontal">
+												<input type="hidden" id="modal-newsclassno" name="modal-newsclassno">
+												<input type="hidden" id="modal-langcode" name="modal-langcode">
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-newsclassname">分类名称</label>
+													<div class="col-sm-9">
+														<input type="text" id="modal-newsclassname" name="modal-newsclassname" class="col-xs-10 col-sm-12">
+														<div id="errmodal-newsclassname" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+											</div>
+										</div>
+										
+									</div>
+
+									<div class="modal-footer no-margin-top">
+										<button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="width: 70px;">取消</button>
+										<button id="btn-modal-lang-save" type="button" class="btn btn-sm btn-primary" data-loading-text="提交中..." style="min-width: 70px;">保存</button>
+									</div>
+									</form>
+								</div><!-- /.modal-content -->
+							</div><!-- /.modal-dialog -->
+						</div>
+						{{end}}
+
+					</div><!-- /.page-content -->
+				</div>
+			</div><!-- /.main-content -->
+			{{ template "foot.html" .}}
+
+		<!-- inline scripts related to this page -->
+		<script type="text/javascript">
+			jQuery(function($){
+
+				var tree_data = {{ .data.res }};
+
+				$('#tree').append(CreateTreeHtml(tree_data));
+				$('.tree-loader').addClass('hidden');
+
+				$('.tree-branch-header').hover(function(){
+					$(this).find('.action-buttons').removeClass('hidden');
+				}, function(){
+					$(this).find('.action-buttons').addClass('hidden');
+				});
+				$('.tree-news').hover(function(){
+					$(this).find('.action-buttons').removeClass('hidden');
+				}, function(){
+					$(this).find('.action-buttons').addClass('hidden');
+				});
+				$('.tree-branch-header i.icon-folder').click(function(){
+					var li = $(this).closest('li.tree-branch');
+					var expanded = $(li).attr('aria-expanded');
+					if (expanded == 'true') {
+						$(this).addClass('tree-plus');
+						$(this).removeClass('tree-minus');
+						$(li).removeClass('tree-open');
+						$(li).attr('aria-expanded', 'false');
+						$(li).find('ul').addClass('hidden');
+					} else {
+						$(this).removeClass('tree-plus');
+						$(this).addClass('tree-minus');
+						$(li).addClass('tree-open');
+						$(li).attr('aria-expanded', 'true');
+						$(li).find('ul').removeClass('hidden');
+					}
+				});
+
+				function CreateTreeHtml(data) {
+					var html = '';
+					for (var k in data) {
+						var l = Object.keys(data[k]['children']).length;
+						if (l > 0)
+							html += '<li class="tree-branch tree-open" role="treenews" aria-expanded="true">';
+						else
+							html += '<li class="tree-news" role="treenews"';
+						if (l > 0) {
+							html += '	<div class="tree-branch-header">';
+							html += '		<span class="tree-branch-name">';
+							html += '			<i class="icon-folder ace-icon tree-minus"></i> ';
+							html += '			<span class="tree-label">' + data[k]['newsclassname'] + '</span>';
+							html += '		</span>';
+							html += CreateRightButton(data[k]['newsclassno'], l);
+							html += '	</div>';
+						} else {
+							html += '	<span class="tree-news-name">';
+							html += '		<span class="tree-label">' + data[k]['newsclassname'] + '</span>';
+							html += '	</span>';
+							html += CreateRightButton(data[k]['newsclassno'], l);
+						}
+						
+						html += '	<ul class="tree-branch-children" role="group">';
+						html += CreateTreeHtml(data[k]['children']);
+						html += '	</ul>';
+						html += '</li>';
+					}
+					
+					return html;
+				}
+
+				function CreateRightButton(no, childrenNum) {
+					var html = '';
+					html += '<div class="pull-right pos-rel dropdown"';
+					if (childrenNum <= 0)
+						html += ' style="right: -9px;" ';
+					html += '>';
+					html += '	<button class="btn btn-minier bigger btn-danger" data-toggle="dropdown">';
+					html += '		&nbsp;&nbsp;操作&nbsp;&nbsp;<i class="ace-icon fa fa-caret-down icon-on-right"></i>';
+					html += '	</button>';
+
+					html += '	<ul class="dropdown-menu dropdown-only-icon dropdown-yellow dropdown-caret dropdown-close dropdown-menu-right">';
+					html += '		<li>';
+					html += '			<a href="#modal-edit" class="tooltip-success" data-rel="tooltip" title="新增子分类" data-toggle="modal" data-selectno="' + no + '" id="btn-add-' + no + '">';
+					html += '				新增';
+					html += '			</a>';
+					html += '		</li>';
+
+					html += '		<li>';
+					html += '			<a href="#modal-edit" class="tooltip-success" data-rel="tooltip" title="编辑分类" data-toggle="modal" data-selectno="' + no + '" id="btn-edit-' + no + '">';
+					html += '				编辑';
+					html += '			</a>';
+					html += '		</li>';
+
+					html += '		<li>';
+					html += '			<a href="javascript: void(0)" class="tooltip-error" data-rel="tooltip" title="删除分类" onclick="ajaxDelete(' + no + ');">';
+					html += '				删除';
+					html += '			</a>';
+					html += '		</li>';
+
+					{{ if gt (len $.app.languages) 0 }}
+					html += '		<li class="divider"></li>';
+					{{end}}
+					{{range $j, $w := $.app.languages}}
+					html += '		<li>';
+					html += '			<a href="#modal-edit-lang" class="tooltip-success" data-rel="tooltip" title="设置语言" data-toggle="modal" data-selectno="' + no + '" data-lang="{{ $j }}" id="btn-lang-{{$j}}-' + no + '">{{$w}}</a>';
+					html += '</li>';
+					{{end}}
+
+					html += '	</ul>';
+					html += '</div>';
+					return html;
+				}
+			});
+			
+			$('#modal-edit').on('shown.bs.modal', function (event) {
+				//设置弹出框第一个显示的input获取焦点
+				setFirstInputFocus($(this))
+			});
+			$('#modal-edit-lang').on('shown.bs.modal', function (event) {
+				//设置弹出框第一个显示的input获取焦点
+				setFirstInputFocus($(this))
+			});
+
+			$('#modal-edit').on('show.bs.modal', function (event) {
+				var modal = $(this);
+				var button = $(event.relatedTarget) // Button that triggered the modal
+				//var recipient = button.data('whatever') // Extract info from data-* attributes
+
+				clearModalValue(modal);
+				clearModalError(modal);
+				
+				modal.find('#modal-newsclassparentname').text('');
+
+				if ($(button).attr("id") == 'btn-add')
+					showAdd(modal, '');
+				else if ($(button).attr("id").indexOf('btn-add-') == 0)
+					showAdd(modal, $(button).data("selectno"));
+				else if ($(button).attr("id").indexOf('btn-edit-') == 0)
+					showEdit(modal, $(button).data("selectno"));
+				else {
+					modal.modal('hide');
+					showAlertDialog('系统错误！');
+				}
+			});
+
+			$('#btn-modal-save').on(ace.click_event, function() {
+				var modal = $('#modal-edit');
+				var btn = $(this);
+				btn.button('loading');
+				
+				var data = removeKeyModal($('#modalform').serializeObject());
+				if ($('#modal-newsclassno').val() == '')
+					data['cmd'] = 'ajax_add';
+				else
+					data['cmd'] = 'ajax_edit';
+
+				ajaxPost(window.location.pathname, data, function(obj){
+					btn.button('reset');
+
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret == 1000) {
+						showModalError(obj.error, modal);
+						return;
+					} else if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.modal('hide');
+					$('#cmd').val('list_search');
+					$("#mainform").submit();
+				});
+			});
+
+			function showAdd(modal,value) {
+				modal.find('.modal-title').text('新增分类');
+
+				if (value == null || value == '' || value == '0') {
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+					return;
+				}
+
+				modal.find('.modal-progress').show();
+				modal.find('.modal-content').hide();
+
+				var data = {"cmd":"ajax_detail", "searchNo":value};
+				ajaxPost(window.location.pathname, data, function(obj){
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+
+					modal.find('#modal-newsclassno').val('');
+					modal.find('#modal-newsclassname').val('');
+					modal.find('#modal-newsclassparentno').val(obj.data['NewsClassNo']);
+					modal.find('#modal-newsclassparentname').text(obj.data['NewsClassName']);
+				});
+			}
+
+			function showEdit(modal,value) {
+				modal.find('.modal-progress').show();
+				modal.find('.modal-content').hide();
+
+				var data = {"cmd":"ajax_detail", "searchNo":value};
+				ajaxPost(window.location.pathname, data, function(obj){
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+
+					modal.find('.modal-title').text('编辑编辑：' + obj.data.NewsClassName);
+
+					modal.find('#modal-Newsclassparentname').text(obj.data['NewsClassParentName']);
+
+					showModalValue(obj.data, modal);
+				});
+			}
+
+			//必须在外部，否则html元素那边无法调用
+			function ajaxDelete(value) {
+				if (value == null || value == '') {
+					showAlertDialog('请选择一条数据！');
+					return false;
+				}
+
+				bootbox.confirm("确定要删除数据吗？", function (result) {
+					if (result) {
+
+						var data = {};
+						data['cmd'] = 'ajax_del';
+						data['searchNo'] = value;
+
+						ajaxPost(window.location.pathname, data, function(obj){
+							var err = CheckAjaxReturnData(obj);
+							if (err != '') {
+								showAlertDialog(err);
+								return;
+							}
+
+							if (obj.ret != 0) {
+								if (obj.hasOwnProperty('msg') && obj.msg != '')
+									showAlertDialog(obj.msg);
+								else
+									showAlertDialog('服务器发生未知错误！');
+								return;
+							}
+							showAlertDialog('删除成功！确认刷新画面。', function (){
+								document.location.reload();
+							});
+						});
+					}
+				});
+				return false;
+			}
+
+
+			//language
+			$('#modal-edit-lang').on('show.bs.modal', function (event) {
+				var modal = $(this);
+				var button = $(event.relatedTarget) // Button that triggered the modal
+				//var recipient = button.data('whatever') // Extract info from data-* attributes
+
+				clearModalValue(modal);
+				clearModalError(modal);
+
+				var selectNo = $(button).data("selectno");
+				if (selectNo == null || selectNo == '') {
+					showAlertDialog('未知错误！');
+					return false;
+				}
+
+				modal.find('#modal-langcode').val($(button).data("lang"));
+
+				showEditLang(modal, selectNo, $(button).data("lang"), $(button).html());
+			});
+
+			//language
+			function showEditLang(modal,value, langcode, langname) {
+
+				modal.find('.modal-progress').show();
+				modal.find('.modal-content').hide();
+
+				var data = {"cmd":"ajax_detail_lang", "searchNo":value, "langcode":langcode};
+				ajaxPost(window.location.pathname, data, function(obj){
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+					if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+
+					modal.find('.modal-title').text(langname + '：' + obj.sData.NewsClassName);
+
+					showModalValue(obj.data, modal);
+				});
+			}
+
+			$('#btn-modal-lang-save').on(ace.click_event, function() {
+				var modal = $('#modal-edit-lang');
+				var btn = $(this);
+				btn.button('loading');
+
+				var data = removeKeyModal($('#modallangform').serializeObject());
+				if (modal.find('#modal-newsclassno').val() == '' ||
+					modal.find('#modal-langcode').val() == '') {
+					showAlertDialog('服务器发生未知错误！');
+					return;
+				}
+				data['cmd'] = 'ajax_edit_lang';
+
+				ajaxPost(window.location.pathname, data, function(obj){
+					btn.button('reset');
+
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret == 1000) {
+						showModalError(obj.error, modal);
+						return;
+					} else if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.modal('hide');
+					btn.button('reset');
+				});
+			});
+		</script>
+	</body>
+</html>
+{{ end }}

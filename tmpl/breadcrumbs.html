@@ -1,0 +1,43 @@
+{{ define "breadcrumbs.html" }}
+					<div class="breadcrumbs ace-save-state breadcrumbs-fixed" id="breadcrumbs">
+						<ul class="breadcrumb">
+							<li>
+								<i class="ace-icon fa fa-home home-icon"></i>
+								<a href="/index">Home</a>
+							</li>
+							{{ if eq .common.router "index" }}
+							<li class="active">Dashboard</li>
+							{{ else if eq .common.router "admin" }}
+							<li class="active">管理员</li>
+							{{ else if eq .common.router "aboutus" }}
+							<li class="active">公司简介</li>
+							{{ else if eq .common.router "item" }}
+							<li class="active">商品</li>
+							{{ else if eq .common.router "itemclass" }}
+							<li class="active">商品分类</li>
+							{{ else if eq .common.router "job" }}
+							<li class="active">人才招聘</li>
+							{{ else if eq .common.router "permission" }}
+							<li class="active">权限管理</li>
+							{{ else if eq .common.router "profile" }}
+							<li class="active">个人设置</li>
+							{{ else if eq .common.router "system" }}
+							<li class="active">系统设置</li>
+							{{ end }}
+						</ul><!-- /.breadcrumb -->
+
+						<div class="nav-search" id="nav-search" style="top: 14px;left: 50%;">
+							<form class="form-search" style="display: none;">
+								<span class="input-icon">
+									<input type="text" placeholder="Search ..." class="nav-search-input" id="nav-search-input" autocomplete="off" />
+									<i class="ace-icon fa fa-search nav-search-icon"></i>
+								</span>
+							</form>
+							<button type="button" class="btn btn-sm btn-danger {{ if eq (mapValue .cookie "cookie_show_search") "1" }}btn-white{{ end }}" id="btn-search-toggle" style="border-width: 1px;border-bottom-style: none;border-top-left-radius: 10px;border-top-right-radius: 10px;padding: 2px 15px;{{ if not .common.isHeaderSearch }}display: none;{{ end }}">
+								<span class="bigger-110">检索</span>
+								<i class="icon-on-right ace-icon fa {{ if eq (mapValue .cookie "cookie_show_search") "1" }}fa-arrow-up{{ else }}fa-arrow-down{{ end }}"></i>
+							</button>
+						</div><!-- /.nav-search -->
+						<span class="label label-lg label-success arrowed arrowed-right" style="position: absolute;top: 9px;right: 22px;{{ if not .common.isHeaderListInfo }}display: none;{{ end }}">共{{ .common.pageCount }}页，{{ .common.rowCount }}条</span>
+					</div>
+{{ end }}

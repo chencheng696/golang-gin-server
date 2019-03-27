@@ -1,0 +1,28 @@
+{{ define "page.html" }}
+											<ul class="pagination pull-right" style="margin: 0px;{{ if le .common.pageCount 1 }}display: none;{{ end }}">
+												<input type="hidden" id="pageNo" name="pageNo" value="{{ .common.pageNo }}">
+												<li class="{{ if le .common.pageNo 1 }}disabled{{ end }}">
+													<a href="javascript:void(0)" onclick="submitPageNo(1);">首页</a>
+												</li>
+												<li class="{{ if le .common.pageNo 1 }}disabled{{ end }}">
+													<a href="javascript:void(0)" onclick="submitPagePrevious();">
+														<i class="ace-icon fa fa-angle-double-left"></i>
+													</a>
+												</li>
+
+												{{range $i, $v := .common.pageArray}}
+												<li class="{{ if eq $.common.pageNo $v }}active{{ end }}">
+													<a href="javascript:void(0)" onclick="submitPageNo({{ $v }});">{{ $v }}</a>
+												</li>
+												{{end}}
+												
+												<li class="{{ if ge .common.pageNo .common.pageCount }}disabled{{ end }}">
+													<a href="javascript:void(0)" onclick="submitPageNext();">
+														<i class="ace-icon fa fa-angle-double-right"></i>
+													</a>
+												</li>
+												<li class="{{ if ge .common.pageNo .common.pageCount }}disabled{{ end }}">
+													<a href="javascript:void(0)" onclick="submitPageNo({{ .common.pageCount }});">尾页</a>
+												</li>
+											</ul><!-- /.page-ul -->
+{{ end }}

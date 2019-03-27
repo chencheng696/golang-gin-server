@@ -1,0 +1,418 @@
+{{ define "permission.html" }}
+{{ template "head.html" .}}
+		<div class="main-container ace-save-state" id="main-container">
+
+			{{ template "left.html" .}}
+
+			<div class="main-content">
+				<div class="main-content-inner">
+
+					{{ template "breadcrumbs.html" .}}
+
+					<div class="page-content no-padding-bottom">
+
+						<form id="mainform" name="mainform" method="post" action="" enctype="multipart/form-data">
+							<input type="hidden" id="cmd" name="cmd" value="">
+							<input type="hidden" id="searchNo" name="searchNo" value="">
+
+						<div class="row">
+							<div class="col-xs-12">
+								<!-- PAGE CONTENT BEGINS -->
+
+								<div class="row">
+									<div class="col-sm-6">
+										<div class="widget-box widget-color-blue2">
+											<div class="widget-header">
+												<h4 class="widget-title lighter smaller">权限管理</h4>
+											</div>
+											<div class="widget-body">
+												<div class="widget-main padding-8">
+													<ul id="tree" class="tree tree-unselectable" role="tree">
+														<li class="tree-branch hide" data-template="treebranch" role="treeitem" aria-expanded="false">
+															<div class="tree-branch-header">
+																<span class="tree-branch-name">
+																	<i class="icon-folder ace-icon tree-plus"></i>
+																	<span class="tree-label"></span>
+																</span>
+															</div>
+															<ul class="tree-branch-children" role="group"></ul>
+														</li>
+														<li class="tree-item hide" data-template="treeitem" role="treeitem">
+															<span class="tree-item-name">
+																<span class="tree-label"></span>
+															</span>
+														</li>
+													</ul>
+													<div class="tree-loader" role="alert">
+														<div class="tree-loading" style="position: relative;left: 50%;">
+															<i class="ace-icon fa fa-refresh fa-spin blue"></i>
+														</div>
+													</div><!-- /.loading -->
+												</div>
+											</div>
+										</div><!-- /.tree -->
+									</div>
+								</div>
+
+								<!-- PAGE CONTENT ENDS -->
+							</div><!-- /.col -->
+						</div><!-- /.row -->
+						</form>
+
+						<div id="modal-edit" class="modal fade" tabindex="-1">
+							<div class="modal-progress">
+								<h3 class="smaller lighter grey">
+									<i class="ace-icon fa fa-spinner fa-spin orange bigger-125"></i>
+								</h3>
+							</div>
+							<div class="modal-dialog" style="width: 400px;">
+								<div class="modal-content">
+									<form id="modalform" name="modalform" method="post" action="" enctype="multipart/form-data">
+									<div class="modal-header no-padding">
+										<div class="table-header modal-ellipsis">
+											<button type="button" class="bootbox-close-button close" data-dismiss="modal" aria-hidden="true">
+												<span class="white">&times;</span>
+											</button>
+											<span class="modal-title">新增或编辑</span>
+										</div>
+									</div>
+
+									<div class="modal-body">
+										<div class="row">
+											<div class="col-xs-12 form-horizontal">
+												<input type="hidden" id="modal-permno" name="modal-permno">
+												<input type="hidden" id="modal-permparentno" name="modal-permparentno">
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-permname">权限名称</label>
+													<div class="col-sm-9">
+														<input type="text" id="modal-permname" name="modal-permname" class="col-xs-10 col-sm-12">
+														<div id="errmodal-permname" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-permkey">权限Key</label>
+													<div class="col-sm-9">
+														<input type="text" id="modal-permkey" name="modal-permkey" class="col-xs-10 col-sm-12">
+														<div id="errmodal-permkey" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+											</div>
+										</div>
+										
+									</div>
+
+									<div class="modal-footer no-margin-top">
+										<button id="btn-modal-cancel" type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="width: 70px;">取消</button>
+										<button id="btn-modal-save" type="button" class="btn btn-sm btn-primary" data-loading-text="提交中..." style="min-width: 70px;">保存</button>
+									</div>
+									</form>
+								</div><!-- /.modal-content -->
+							</div><!-- /.modal-dialog -->
+						</div>
+
+					</div><!-- /.page-content -->
+				</div>
+			</div><!-- /.main-content -->
+			{{ template "foot.html" .}}
+
+		<!-- inline scripts related to this page -->
+		<script type="text/javascript">
+			jQuery(function($){
+
+				var tree_data = {{ .data.res }};
+
+				$('#tree').append(CreateTreeHtml(tree_data));
+				$('.tree-loader').addClass('hidden');
+
+				$('.tree-branch-header').hover(function(){
+					$(this).find('.action-buttons').removeClass('hidden');
+				}, function(){
+					$(this).find('.action-buttons').addClass('hidden');
+				});
+				$('.tree-item').hover(function(){
+					$(this).find('.action-buttons').removeClass('hidden');
+				}, function(){
+					$(this).find('.action-buttons').addClass('hidden');
+				});
+				$('.tree-branch-header i.icon-folder').click(function(){
+					var li = $(this).closest('li.tree-branch');
+					var expanded = $(li).attr('aria-expanded');
+					if (expanded == 'true') {
+						$(this).addClass('tree-plus');
+						$(this).removeClass('tree-minus');
+						$(li).removeClass('tree-open');
+						$(li).attr('aria-expanded', 'false');
+						$(li).find('ul').addClass('hidden');
+					} else {
+						$(this).removeClass('tree-plus');
+						$(this).addClass('tree-minus');
+						$(li).addClass('tree-open');
+						$(li).attr('aria-expanded', 'true');
+						$(li).find('ul').removeClass('hidden');
+					}
+				});
+
+				function CreateTreeHtml(data) {
+					var html = '';
+					for (var k in data) {
+						var l = Object.keys(data[k]['children']).length;
+						if (l > 0)
+							html += '<li class="tree-branch tree-open" role="treeitem" aria-expanded="true">';
+						else
+							html += '<li class="tree-item" role="treeitem"';
+						if (l > 0) {
+							html += '	<div class="tree-branch-header">';
+							html += '		<span class="tree-branch-name">';
+							html += '			<i class="icon-folder ace-icon tree-minus"></i> ';
+							html += '			<span class="tree-label">' + data[k]['permname'] + '</span>';
+							html += '		</span>';
+							html += CreateRightButton();
+							html += '	</div>';
+						} else {
+							html += '	<span class="tree-item-name">';
+							html += '		<span class="tree-label">' + data[k]['permname'] + '</span>';
+							html += '	</span>';
+							html += CreateRightButton();
+						}
+						
+						html += '	<ul class="tree-branch-children" role="group">';
+						html += CreateTreeHtml(data[k]['children']);
+						html += '	</ul>';
+						html += '</li>';
+					}
+					
+					return html;
+				}
+
+				function CreateRightButton() {
+					var html = '';
+					html += '		<div class="pull-right action-buttons hidden">';
+					html += '			<a class="blue" href="#modal-edit" data-toggle="modal">';
+					html += '				<i class="ace-icon fa fa-plus bigger-130"></i>';
+					html += '			</a>';
+					html += '			<a class="blue" href="#modal-edit" data-toggle="modal">';
+					html += '				<i class="ace-icon fa fa-pencil bigger-130"></i>';
+					html += '			</a>';
+					html += '			<a class="red" href="#modal-edit" data-toggle="modal">';
+					html += '				<i class="ace-icon fa fa-trash-o bigger-130"></i>';
+					html += '			</a>';
+					html += '		</div>';
+					return html;
+				}
+/*
+				var sampleData = initiateDemoData();//see below
+
+				$('#tree').ace_tree({
+					dataSource: sampleData,
+					'multiSelect': false,
+					'cacheItems': true,
+					'open-icon' : 'ace-icon tree-minus',
+					'close-icon' : 'ace-icon tree-plus',
+					'itemSelect' : true,
+					'folderSelect': false,
+					'selected-icon' : null,
+					'unselected-icon' : null,
+					loadingHTML : '<div class="tree-loading"><i class="ace-icon fa fa-refresh fa-spin blue"></i></div>'
+				});
+				$('#tree').find('.tree-folder-header').each(function(){
+					if ($(this).parent().css('display') == 'block')
+						$(this).trigger('click');
+				});
+
+				$('#tree').on('loaded.fu.tree', function(e, data) {
+					console.log('loaded');
+				}).on('updated.fu.tree', function(e, data) {
+					console.log('updated');
+					console.log(data);
+				}).on('selected.fu.tree', function(e, data) {
+					console.log('selected');
+				}).on('unselected.fu.tree', function(e) {
+					console.log('unselected');
+				}).on('opened.fu.tree', function(e, data) {
+					console.log('opened');
+				}).on('closed.fu.tree', function(e, data) {
+					console.log('closed');
+				}).on('click.fu.tree', function(e) {
+					console.log('click');
+				});
+
+
+				function initiateDemoData(){
+					var tree_data = {{ .data.res }}
+
+					var dataSource = function(options, callback){
+						var $data = null
+						if(!("text" in options) && !("type" in options)){
+							$data = tree_data;//the root tree
+							callback({ data: $data });
+							return;
+						}
+						else if("type" in options && options.type == "folder") {
+							if("additionalParameters" in options && "children" in options.additionalParameters)
+								$data = options.additionalParameters.children || {};
+							else $data = {}//no data
+						}
+						
+						//if($data != null)//this setTimeout is only for mimicking some random delay
+						//	setTimeout(function(){callback({ data: $data });} , parseInt(Math.random() * 500) + 200);
+
+						//we have used static data here
+						//but you can retrieve your data dynamically from a server using ajax call
+						//checkout examples/treeview.html and examples/treeview.js for more info
+
+						if ($data != null)
+							callback({ data: $data });
+					}
+
+					return dataSource
+				}*/
+			});
+			
+			$('#modal-edit').on('show.bs.modal', function (event) {
+				var modal = $(this);
+				var button = $(event.relatedTarget) // Button that triggered the modal
+				//var recipient = button.data('whatever') // Extract info from data-* attributes
+
+				clearModalValue(modal);
+				clearModalError(modal);
+				
+				if ($(button).attr("id") == 'btn-add') {
+					modal.find('#modal-busname').removeAttr('readonly');
+					modal.find('#modal-buskey').removeAttr('readonly');
+					modal.find('#modal-busstatus').val('1');
+				} else {
+					modal.find('#modal-busname').attr('readonly', 'true');
+					modal.find('#modal-buskey').attr('readonly', 'true');
+				}
+
+				if ($(button).attr("id") == 'btn-add') {
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+					modal.find('.modal-title').text('新增企业')
+				} else if ($(button).attr("id") == 'btn-edit') {
+					var arr_no = [];
+					$("input[name='selectNo']").each(function(){
+						if ($(this).is(':checked')) {
+							arr_no.push($(this).val());
+						}
+					});
+
+					var errmsg = '';
+					if (arr_no.length == 0)
+						errmsg = '请选择一条数据！';
+					else if (arr_no.length > 1)
+						errmsg = '只能选择一条数据！';
+
+					if (errmsg != '') {
+						showAlertDialog(errmsg);
+						return false;
+					}
+
+					showEdit(modal, arr_no[0]);
+
+					modal.find('.modal-progress').show();
+					modal.find('.modal-content').hide();
+				} else if ($(button).attr("id").indexOf('btn-edit-') == 0 || 
+							$(button).attr("id").indexOf('btn-edit2-') == 0) {
+					var selectNo = $(button).data("selectno");
+					if (selectNo == null || selectNo == '') {
+						showAlertDialog('未知错误！');
+						return false;
+					}
+
+					showEdit(modal, selectNo);
+
+					modal.find('.modal-progress').show();
+					modal.find('.modal-content').hide();
+				}
+			});
+
+			$('#btn-modal-save').on(ace.click_event, function() {
+				var btn = $(this);
+				btn.button('loading');
+				
+				var data = removeKeyModal($('#modalform').serializeObject());
+				if ($('#modal-busno').val() == '')
+					data['cmd'] = 'ajax_add';
+				else
+					data['cmd'] = 'ajax_edit';
+
+				ajaxPost(window.location.pathname, data, function(obj){
+					btn.button('reset');
+
+					if (obj == null) {
+						$('#modal-edit').modal('hide');
+						showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+					if (typeof(obj) != 'object') {
+						$('#modal-edit').modal('hide');
+						showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+					if (obj.ret == 1000) {
+						showModalError(obj.error, $('#modal-edit'));
+						return;
+					} else if (obj.ret != 0) {
+						$('#modal-edit').modal('hide');
+						showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+					$('#modal-edit').modal('hide');
+					$('#cmd').val('list_search');
+					$("#mainform").submit();
+				});
+			});
+
+			function showEdit(modal,value) {
+				var data = {"cmd":"ajax_detail", "searchNo":value};
+				ajaxPost(window.location.pathname, data, function(obj){
+					if (obj == null) {
+						$('#modal-edit').modal('hide');
+						showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+					if (typeof(obj) != 'object') {
+						$('#modal-edit').modal('hide');
+						showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+					if (obj.ret != 0) {
+						$('#modal-edit').modal('hide');
+						showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+					if (!obj.hasOwnProperty('data')) {console.log(4);
+						$('#modal-edit').modal('hide');
+						showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+
+					modal.find('.modal-title').text('编辑企业：' + obj.data.BusName);
+
+					showModalValue(obj.data, modal);
+				});
+			}
+
+			//必须在外部，否则html元素那边无法调用
+			function delSubmit(value) {
+				if (value == null || value == '') {
+					showAlertDialog('请选择一条数据！');
+					return false;
+				}
+
+				bootbox.confirm("确定要删除数据吗？", function (result) {
+					if (result) {
+						$('#searchNo').val(value);
+						$('#cmd').val('list_del');
+						$("#mainform").submit();
+					}
+				});
+				return false;
+			}
+		</script>
+	</body>
+</html>
+{{ end }}

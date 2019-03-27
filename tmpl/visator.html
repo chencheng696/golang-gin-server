@@ -1,0 +1,538 @@
+{{ define "visator.html" }}
+{{ template "head.html" .}}
+		<div class="main-container ace-save-state" id="main-container">
+			
+			{{ template "left.html" .}}
+
+			<div class="main-content">
+				<div class="main-content-inner">
+					
+					{{ template "breadcrumbs.html" .}}
+
+					<div class="page-content no-padding-bottom">
+
+						<form id="mainform" name="mainform" method="post" action="" enctype="multipart/form-data">
+							<input type="hidden" id="cmd" name="cmd" value="">
+							<input type="hidden" id="searchNo" name="searchNo" value="">
+
+						<div class="page-header" id="div-search" style="{{ if ne (mapValue .cookie "cookie_show_search") "1" }}display: none;{{ end }}">
+							<div class="clearfix">
+								<div class="col-xs-12 col-sm-4" style="padding-left: 0px;">
+									<div class="input-group">
+										<span class="input-group-addon">标题</span>
+
+										<input type="text" name="searchName" class="form-control search-query" placeholder="" value="{{ .data.searchName }}" />
+									</div>
+								</div>
+								<div class="col-xs-12" style="width: 100px;">
+									<span class="input-group-btn">
+										<button type="button" class="btn btn-purple btn-sm" id="btn-search">
+											<span class="ace-icon fa fa-search icon-on-right bigger-110"></span>
+											Search
+										</button>
+									</span>
+								</div>
+							</div>
+						</div><!-- /.page-header -->
+
+						<div class="row">
+							<div class="col-xs-12">
+								<div class="col-sm-12 text-danger no-padding">{{ .error.commomMsg }}</div>
+								<div class="col-sm-12 text-danger no-padding">{{ .error.uploadFile }}</div>
+								<!-- PAGE CONTENT BEGINS -->
+								<div class="row">
+									<div class="col-xs-12">
+										<div class="clearfix">
+											<div class="pull-left tableTools-container">
+												<button id="btn-del" type="button" class="btn btn-white btn-danger btn-bold">
+													<i class="fa fa-trash-o bigger-110 red"></i> 
+													删除
+												</button>
+											</div>
+											{{ template "page.html" .}}
+										</div>
+										<table id="main-table" class="table  table-bordered table-hover no-margin-bottom">
+											<thead>
+												<tr>
+													<th class="center" style="width: 40px;">
+														<label class="pos-rel">
+															<input type="checkbox" class="ace" />
+															<span class="lbl"></span>
+														</label>
+													</th>
+													<th class="detail-col">No.</th>
+													<th>姓名</th>
+													<th>单位</th>
+													<th>地址</th>
+													<th>性别</th>
+													<th style="width: 100px;">电话</th>
+													<th style="width: 100px;">手机</th>
+													<th style="width: 140px;">传真</th>
+													<th style="width: 140px;">邮箱</th>
+													<th style="width: 140px;">网址</th>
+													<th style="width: 140px;">主题</th>
+													<th style="width: 70px;"></th>
+												</tr>
+											</thead>
+
+											<tbody>
+												{{range $i, $v := .data.res}}
+												<tr>
+													<td class="center">
+														<label class="pos-rel">
+															<input name="selectNo" type="checkbox" class="ace" value="{{ $v.FbNo }}"/>
+															<span class="lbl"></span>
+														</label>
+													</td>
+
+													<td class="center">{{ multAdd $i 1 (multTimes (multMinus $.common.pageNo 1) $.common.pageRow) }}</td>
+
+													<td>{{ $v.FbName }}</td>
+													<td>{{ $v.FbCompany }}</td>
+													<td>{{ $v.FbAddress }}</td>
+													<td>{{ $v.FbSex }}</td>
+													<td>{{ $v.FbTel }}</td>
+													<td>{{ $v.FbPhone }}</td>
+													<td>{{ $v.FbFax }}</td>
+													<td>{{ $v.FbEmail }}</td>
+													<td>{{ $v.FbUrl }}</td>
+													<td>{{ $v.FbTitle }}</td>
+													
+													<td>
+														<div class="btn-group">
+															<button id="btn-edit-{{ $v.FbNo }}" type="button" class="btn btn-xs btn-danger" data-selectno="{{ $v.FbNo }}" data-toggle="modal" data-target="#modal-edit" data-backdrop="static" data-keyboard="false">详情</button>
+															<button type="button" data-toggle="dropdown" class="btn btn-xs btn-danger dropdown-toggle" aria-expanded="false">
+																<span class="ace-icon fa fa-caret-down icon-only"></span>
+															</button>
+
+															<ul class="dropdown-menu dropdown-menu-right dropdown-danger">
+																<li>
+																	<a id="btn-edit2-{{ $v.FbNo }}" href="#modal-edit" data-selectno="{{ $v.FbNo }}" data-toggle="modal">编辑</a>
+																</li>
+
+																<li>
+																	<a href="javascript: void(0)" onclick="delSubmit({{ $v.FbNo }});">删除</a>
+																</li>
+																{{ if gt (len $.app.languages) 0 }}
+																<li class="divider"></li>
+																{{end}}
+																{{range $j, $w := $.app.languages}}
+																<li>
+																	<a id="btn-lang-{{$j}}-{{ $v.FbNo }}" href="#modal-edit-lang" data-selectno="{{ $v.FbNo }}" data-lang="{{ $j }}" data-toggle="modal">{{$w}}</a>
+																</li>
+																{{end}}
+															</ul>
+														</div>
+													</td>
+												</tr>
+												{{end}}
+											</tbody>
+										</table>
+									</div><!-- /.span -->
+								</div><!-- /.row -->
+								<!-- PAGE CONTENT ENDS -->
+							</div><!-- /.col -->
+						</div><!-- /.row -->
+						</form>
+
+						<div id="modal-edit" class="modal fade" tabindex="-1">
+							<div class="modal-progress">
+								<h3 class="smaller lighter grey">
+									<i class="ace-icon fa fa-spinner fa-spin orange bigger-125"></i>
+								</h3>
+							</div>
+							<div class="modal-dialog" style="width: 400px;">
+								<div class="modal-content">
+									<form id="modalform" name="modalform" method="post" action="" enctype="multipart/form-data">
+									<div class="modal-header no-padding">
+										<div class="table-header modal-ellipsis">
+											<button type="button" class="bootbox-close-button close" data-dismiss="modal" aria-hidden="true">
+												<span class="white">&times;</span>
+											</button>
+											<span class="modal-title">新增或编辑</span>
+										</div>
+									</div>
+
+									<div class="modal-body">
+										<div class="row">
+											<div class="col-xs-12 form-horizontal">
+											<input type="hidden" id="modal-fbno" name="modal-fbno">
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-fbcontent">详细内容</label>
+													<div class="col-sm-9">
+														<input type="text" id="modal-fbcontent" name="modal-fbcontent" class="col-xs-10 col-sm-12">
+														<div id="errmodal-fbcontent" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+											</div>
+										</div>
+										
+									</div>
+
+									<div class="modal-footer no-margin-top">
+										<button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="width: 70px;">取消</button>
+										<button id="btn-modal-save" type="button" class="btn btn-sm btn-primary" data-loading-text="提交中..." style="min-width: 70px;">保存</button>
+									</div>
+									</form>
+								</div><!-- /.modal-content -->
+							</div><!-- /.modal-dialog -->
+						</div>
+
+						{{ if gt (len $.app.languages) 0 }}
+						<!-- language -->
+						<div id="modal-edit-lang" class="modal fade" tabindex="-1">
+							<div class="modal-progress">
+								<h3 class="smaller lighter grey">
+									<i class="ace-icon fa fa-spinner fa-spin orange bigger-125"></i>
+								</h3>
+							</div>
+							<div class="modal-dialog" style="width: 400px;">
+								<div class="modal-content">
+									<form id="modallangform" name="modallangform" method="post" action="" enctype="multipart/form-data">
+									<div class="modal-header no-padding">
+										<div class="table-header modal-ellipsis">
+											<button type="button" class="bootbox-close-button close" data-dismiss="modal" aria-hidden="true">
+												<span class="white">&times;</span>
+											</button>
+											<span class="modal-title">多语言</span>
+										</div>
+									</div>
+
+									<div class="modal-body">
+										<div class="row">
+											<div class="col-xs-12 form-horizontal">
+												<input type="hidden" id="modal-fbno" name="modal-fbno">
+												<input type="hidden" id="modal-langcode" name="modal-langcode">
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-jobname">标题</label>
+													<div class="col-sm-9">
+														<input type="text" id="modal-jobname" name="modal-jobname" class="col-xs-10 col-sm-12">
+														<div id="errmodal-jobname" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-jobaddress">地点</label>
+													<div class="col-sm-9">
+														<input type="text" id="modal-jobaddress" name="modal-jobaddress" class="col-xs-10 col-sm-12">
+														<div id="errmodal-jobaddress" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-3 control-label no-padding-right" for="modal-jobdescription">招聘要求</label>
+													<div class="col-sm-9">
+														<textarea class="input-xlarge" id="modal-jobdescription" name="modal-jobdescription" rows="5"></textarea>
+														<div id="errmodal-jobdescription" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+											</div>
+										</div>
+										
+									</div>
+
+									<div class="modal-footer no-margin-top">
+										<button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="width: 70px;">取消</button>
+										<button id="btn-modal-lang-save" type="button" class="btn btn-sm btn-primary" data-loading-text="提交中..." style="min-width: 70px;">保存</button>
+									</div>
+									</form>
+								</div><!-- /.modal-content -->
+							</div><!-- /.modal-dialog -->
+						</div>
+						{{end}}
+
+					</div><!-- /.page-content -->
+				</div>
+			</div><!-- /.main-content -->
+			{{ template "foot.html" .}}
+
+		<!-- custom scripts -->
+		<script type="text/javascript">
+			$('.date-picker').datepicker({
+				autoclose: true,
+				todayHighlight: true
+			})
+			//show datepicker when clicking on the icon
+			.next().on(ace.click_event, function(){
+				$(this).prev().focus();
+			});
+
+			$('#modal-edit').on('shown.bs.modal', function (event) {
+				//设置弹出框第一个显示的input获取焦点
+				setFirstInputFocus($(this))
+			});
+			$('#modal-edit-lang').on('shown.bs.modal', function (event) {
+				//设置弹出框第一个显示的input获取焦点
+				setFirstInputFocus($(this))
+			});
+
+			$('#btn-search').on('click', function(e) {
+				$('#pageNo').val(1);
+				$('#cmd').val('list_search');
+				$("#mainform").submit();
+			});
+
+			$('#btn-del').on(ace.click_event, function() {
+				var arr_no = [];
+				$("input[name='selectNo']").each(function(){
+					if ($(this).is(':checked')) {
+						arr_no.push($(this).val());
+					}
+				});
+
+				if (arr_no.length == 0) {
+					showAlertDialog('请最少选择一条数据！');
+					return false;
+				}
+				bootbox.confirm("确定要删除数据吗？", function (result) {
+					if (result) {
+						$('#cmd').val('list_del');
+						$("#mainform").submit();
+					}
+				});
+			});
+
+			$('#btn-download').on('click', function(e) {
+				$('#cmd').val('list_download');
+				$("#mainform").submit();
+			});
+
+			$('#modal-edit').on('show.bs.modal', function (event) {
+				var modal = $(this);
+				var button = $(event.relatedTarget) // Button that triggered the modal
+				//var recipient = button.data('whatever') // Extract info from data-* attributes
+
+				if(typeof($(button).attr("id")) == "undefined")
+					return;
+
+				clearModalValue(modal);
+				clearModalError(modal);
+
+				if ($(button).attr("id") == 'btn-add') {
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+					modal.find('.modal-title').text('新增人才招聘')
+					modal.find('#modal-jobheadcount').val('0');
+					modal.find('#modal-jobtreatment').val('0');
+					modal.find('#modal-jobperiod').val('0');
+				} else if ($(button).attr("id") == 'btn-edit') {
+					var arr_no = [];
+					$("input[name='selectNo']").each(function(){
+						if ($(this).is(':checked')) {
+							arr_no.push($(this).val());
+						}
+					});
+
+					var errmsg = '';
+					if (arr_no.length == 0)
+						errmsg = '请选择一条数据！';
+					else if (arr_no.length > 1)
+						errmsg = '只能选择一条数据！';
+
+					if (errmsg != '') {
+						showAlertDialog(errmsg);
+						return false;
+					}
+
+					showEdit(modal, arr_no[0]);
+
+				} else if ($(button).attr("id").indexOf('btn-edit-') == 0 || 
+							$(button).attr("id").indexOf('btn-edit2-') == 0) {
+					var selectNo = $(button).data("selectno");
+					if (selectNo == null || selectNo == '') {
+						showAlertDialog('未知错误！');
+						return false;
+					}
+
+					showEdit(modal, selectNo);
+				} else {
+					modal.modal('hide');
+					showAlertDialog('系统错误！');
+				}
+			});
+
+			$('#btn-modal-save').on(ace.click_event, function() {
+				var modal = $('#modal-edit');
+				var btn = $(this);
+				btn.button('loading');
+
+				var data = removeKeyModal($('#modalform').serializeObject());
+				if ($('#modal-fbno').val() == '')
+					data['cmd'] = 'ajax_add';
+				else
+					data['cmd'] = 'ajax_edit';
+
+				ajaxPost(window.location.pathname, data, function(obj){
+					btn.button('reset');
+
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret == 1000) {
+						showModalError(obj.error, modal);
+						return;
+					} else if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.modal('hide');
+					$('#cmd').val('list_search');
+					$("#mainform").submit();
+				});
+			});
+
+			function showEdit(modal,value) {
+
+				modal.find('.modal-progress').show();
+				modal.find('.modal-content').hide();
+
+				var data = {"cmd":"ajax_detail", "searchNo":value};
+				ajaxPost(window.location.pathname, data, function(obj){
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+
+					modal.find('.modal-title').text('访客详情' );
+
+					showModalValue(obj.data, modal);
+				});
+			}
+
+			//必须在外部，否则html元素那边无法调用
+			function delSubmit(value) {
+				if (value == null || value == '') {
+					showAlertDialog('请选择一条数据！');
+					return false;
+				}
+
+				bootbox.confirm("确定要删除数据吗？", function (result) {
+					if (result) {
+						$('#searchNo').val(value);
+						$('#cmd').val('list_del');
+						$("#mainform").submit();
+					}
+				});
+				return false;
+			}
+
+
+
+
+
+			//language
+			$('#modal-edit-lang').on('show.bs.modal', function (event) {
+				var modal = $(this);
+				var button = $(event.relatedTarget) // Button that triggered the modal
+				//var recipient = button.data('whatever') // Extract info from data-* attributes
+
+				clearModalValue(modal);
+				clearModalError(modal);
+
+				var selectNo = $(button).data("selectno");
+				if (selectNo == null || selectNo == '') {
+					showAlertDialog('未知错误！');
+					return false;
+				}
+
+				modal.find('#modal-langcode').val($(button).data("lang"));
+
+				showEditLang(modal, selectNo, $(button).data("lang"), $(button).html());
+			});
+
+			//language
+			function showEditLang(modal,value, langcode, langname) {
+
+				modal.find('.modal-progress').show();
+				modal.find('.modal-content').hide();
+
+				var data = {"cmd":"ajax_detail_lang", "searchNo":value, "langCode":langcode};
+				ajaxPost(window.location.pathname, data, function(obj){
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+					if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+
+					modal.find('.modal-title').text(langname + '：' + obj.sData.JobName);
+
+					showModalValue(obj.data, modal);
+				});
+			}
+
+			$('#btn-modal-lang-save').on(ace.click_event, function() {
+				var modal = $('#modal-edit-lang');
+				var btn = $(this);
+				btn.button('loading');
+
+				var data = removeKeyModal($('#modallangform').serializeObject());
+				if (modal.find('#modal-jobno').val() == '' ||
+					modal.find('#modal-langcode').val() == '') {
+					showAlertDialog('服务器发生未知错误！');
+					return;
+				}
+				data['cmd'] = 'ajax_edit_lang';
+
+				ajaxPost(window.location.pathname, data, function(obj){
+					btn.button('reset');
+
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret == 1000) {
+						showModalError(obj.error, modal);
+						return;
+					} else if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.modal('hide');
+					btn.button('reset');
+				});
+			});
+		</script>
+	</body>
+</html>
+{{ end }}

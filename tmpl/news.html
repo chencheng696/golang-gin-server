@@ -1,0 +1,653 @@
+{{ define "news.html" }}
+{{ template "head.html" .}}
+		<div class="main-container ace-save-state" id="main-container">
+			
+			{{ template "left.html" .}}
+
+			<div class="main-content">
+				<div class="main-content-inner">
+					
+					{{ template "breadcrumbs.html" .}}e
+
+					<div class="page-content no-padding-bottom">
+
+						<form id="mainform" name="mainform" method="post" action="" enctype="multipart/form-data">
+							<input type="hidden" id="cmd" name="cmd" value="">
+							<input type="hidden" id="searchNo" name="searchNo" value="">
+
+						<div class="page-header" id="div-search" style="{{ if ne (mapValue .cookie "cookie_show_search") "1" }}display: none;{{ end }}">
+							<div class="clearfix">
+								<div class="col-xs-12 col-sm-4" style="padding-left: 0px;">
+									<div class="input-group">
+										<span class="input-group-addon">名称</span>
+
+										<input type="text" name="searchName" class="form-control search-query" placeholder="" value="{{ .data.searchName }}" />
+									</div>
+								</div>
+								<div class="col-xs-12" style="width: 100px;">
+									<span class="input-group-btn">
+										<button type="button" class="btn btn-purple btn-sm" id="btn-search">
+											<span class="ace-icon fa fa-search icon-on-right bigger-110"></span>
+											Search
+										</button>
+									</span>
+								</div>
+							</div>
+						</div><!-- /.page-header -->
+
+						<div class="row">
+							<div class="col-xs-12">
+								<div class="col-sm-12 text-danger no-padding">{{ .error.commomMsg }}</div>
+								<div class="col-sm-12 text-danger no-padding">{{ .error.uploadFile }}</div>
+								<!-- PAGE CONTENT BEGINS -->
+								<div class="row">
+									<div class="col-xs-12">
+										<div class="clearfix">
+											<div class="pull-left tableTools-container">
+												<button id="btn-add" type="button" class="btn btn-white btn-default btn-bold" data-toggle="modal" data-target="#modal-edit" data-backdrop="static" data-keyboard="false">
+													<i class="fa fa-plus bigger-110 blue"></i>
+													新增
+												</button>
+												<button id="btn-edit" type="button" class="btn btn-white btn-default btn-bold" data-toggle="modal" data-target="#modal-edit" data-backdrop="static" data-keyboard="false">
+													<i class="fa fa-edit bigger-110 pink"></i> 
+													编辑
+												</button>
+												<button id="btn-del" type="button" class="btn btn-white btn-danger btn-bold">
+													<i class="fa fa-trash-o bigger-110 red"></i> 
+													删除
+												</button>
+												<button id="btn-download" type="button" class="btn btn-white btn-default btn-bold">
+													<i class="fa fa-download bigger-110 orange"></i> 
+													下载
+												</button>
+											</div>
+											{{ template "page.html" .}}
+										</div>
+										<table id="main-table" class="table  table-bordered table-hover no-margin-bottom">
+											<thead>
+												<tr>
+													<th class="center" style="width: 40px;">
+														<label class="pos-rel">
+															<input type="checkbox" class="ace" />
+															<span class="lbl"></span>
+														</label>
+													</th>
+													<th class="detail-col">No.</th>
+													<th>标题</th>
+													<th>分类</th>
+													<th>状态</th>
+													<th>详情</th>
+													<th>图片路径</th>
+													<th>点击次数</th>
+													<th>显示日期</th>
+													<th style="width: 70px;"></th>
+												</tr>
+											</thead>
+
+											<tbody>
+												{{range $i, $v := .data.res}}
+												<tr>
+													<td class="center">
+														<label class="pos-rel">
+															<input name="selectNo" type="checkbox" class="ace" value="{{ $v.NewsNo }}"/>
+															<span class="lbl"></span>
+														</label>
+													</td>
+
+													<td class="center">{{ multAdd $i 1 (multTimes (multMinus $.common.pageNo 1) $.common.pageRow) }}</td>
+
+													<td>{{ $v.NewsName }}</td>
+													<td>{{ $v.NewsClassNo }}</td>
+													<td>{{ $v.NewsStatus }}</td>
+													<td>{{ $v.NewsInfo }}</td>
+													<td>{{ $v.NewsPicts }}</td>
+													<td>{{ $v.NewsHit }}</td>
+													<td>{{ formatAsDate $v.NewsShowDate `yyyy-MM-dd hh:mm:ss`}}</td>
+													
+													<td>
+														<div class="btn-group">
+															<button id="btn-edit-{{ $v.NewsNo }}" type="button" class="btn btn-xs btn-danger" data-selectno="{{ $v.NewsNo }}" data-toggle="modal" data-target="#modal-edit" data-backdrop="static" data-keyboard="false">查看</button>
+															<button type="button" data-toggle="dropdown" class="btn btn-xs btn-danger dropdown-toggle" aria-expanded="false">
+																<span class="ace-icon fa fa-caret-down icon-only"></span>
+															</button>
+
+															<ul class="dropdown-menu dropdown-menu-right dropdown-danger">
+																<li>
+																	<a id="btn-edit2-{{ $v.NewsNo }}" href="#modal-edit" data-selectno="{{ $v.NewsNo }}" data-toggle="modal">编辑</a>
+																</li>
+
+																<li>
+																	<a href="javascript: void(0)" onclick="delSubmit({{ $v.NewsNo }});">删除</a>
+																</li>
+																{{ if gt (len $.app.languages) 0 }}
+																<li class="divider"></li>
+																{{end}}
+																{{range $j, $w := $.app.languages}}
+																<li>
+																	<a id="btn-lang-{{$j}}-{{ $v.NewsNo }}" href="#modal-edit-lang" data-selectno="{{ $v.NewsNo }}" data-lang="{{ $j }}" data-toggle="modal">{{$w}}</a>
+																</li>
+																{{end}}
+															</ul>
+														</div>
+													</td>
+												</tr>
+												{{end}}
+											</tbody>
+										</table>
+									</div><!-- /.span -->
+								</div><!-- /.row -->
+								<!-- PAGE CONTENT ENDS -->
+							</div><!-- /.col -->
+						</div><!-- /.row -->
+						</form>
+
+						<div id="modal-edit" class="modal fade" tabindex="-1">
+							<div class="modal-progress">
+								<h3 class="smaller lighter grey">
+									<i class="ace-icon fa fa-spinner fa-spin orange bigger-125"></i>
+								</h3>
+							</div>
+							<div class="modal-dialog" style="width: 800px;">
+								<div class="modal-content">
+									<form id="modalform" name="modalform" method="post" action="" enctype="multipart/form-data">
+									<div class="modal-header no-padding">
+										<div class="table-header modal-ellipsis">
+											<button type="button" class="bootbox-close-button close" data-dismiss="modal" aria-hidden="true">
+												<span class="white">&times;</span>
+											</button>
+											<span class="modal-title">新增或编辑</span>
+										</div>
+									</div>
+
+									<div class="modal-body">
+										<div class="row">
+											<div class="col-xs-12 form-horizontal">
+												<input type="hidden" id="modal-newsno" name="modal-newsno">
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-newsname">名称</label>
+													<div class="col-sm-11">
+														<input type="text" id="modal-newsname" name="modal-newsname" class="col-xs-10 col-sm-12">
+														<div id="errmodal-newsname" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-newsclassno">分类</label>
+													<div class="col-sm-11">
+														<input type="text" id="modal-newsclassno" name="modal-newsclassno">
+														<div id="errmodal-newsclassno" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-newspict">图片</label>
+													<div class="col-sm-11">
+														<input multiple="" type="file" id="modal-file">
+														<div id="errmodal-newspict" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-newsstatus">状态</label>
+													<div class="col-sm-11">
+														<div>
+															<label style="margin-top: 6px;">
+																<input class="ace" id="modal-newstatus1" name="modal-newsstatus" type="radio" value="1">
+																<span class="lbl"> 正常 </span>
+															</label>&nbsp;&nbsp;&nbsp;&nbsp;
+															<label style="margin-top: 6px;">
+																<input class="ace" id="modal-newstatus0" name="modal-newsstatus" type="radio" value="0">
+																<span class="lbl"> 下架 </span>
+															</label>
+														</div>
+														<div id="errmodal-newsstatus" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-newsinfo">详情</label>
+													<div class="col-sm-11">
+														<input type="hidden" id="modal-newsinfo" name="modal-newsinfo">
+														<div class="wysiwyg-editor" style="overflow:scroll;height: 400px;max-height: 400px;" id="modal-editor1"></div>
+														<div id="errmodal-newsinfo" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+											</div>
+										</div>
+										
+									</div>
+
+									<div class="modal-footer no-margin-top">
+										<button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="width: 70px;">取消</button>
+										<button id="btn-modal-save" type="button" class="btn btn-sm btn-primary" data-loading-text="提交中..." style="min-width: 70px;">保存</button>
+									</div>
+									</form>
+								</div><!-- /.modal-content -->
+							</div><!-- /.modal-dialog -->
+						</div>
+
+						{{ if gt (len $.app.languages) 0 }}
+						<!-- language -->
+						<div id="modal-edit-lang" class="modal fade" tabindex="-1">
+							<div class="modal-progress">
+								<h3 class="smaller lighter grey">
+									<i class="ace-icon fa fa-spinner fa-spin orange bigger-125"></i>
+								</h3>
+							</div>
+							<div class="modal-dialog" style="width: 400px;">
+								<div class="modal-content">
+									<form id="modallangform" name="modallangform" method="post" action="" enctype="multipart/form-data">
+									<div class="modal-header no-padding">
+										<div class="table-header modal-ellipsis">
+											<button type="button" class="bootbox-close-button close" data-dismiss="modal" aria-hidden="true">
+												<span class="white">&times;</span>
+											</button>
+											<span class="modal-title">多语言</span>
+										</div>
+									</div>
+
+									<div class="modal-body">
+										<div class="row">
+											<div class="col-xs-12 form-horizontal">
+												<input type="hidden" id="modal-newsno" name="modal-newsno">
+												<input type="hidden" id="modal-langcode" name="modal-langcode">
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-newsname">名称</label>
+													<div class="col-sm-11">
+														<input type="text" id="modal-newsname" name="modal-newsname" class="col-xs-10 col-sm-12">
+														<div id="errmodal-newsname" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+												<div class="form-group">
+													<label class="col-sm-1 control-label no-padding-right" for="modal-newsdescription">招聘要求</label>
+													<div class="col-sm-11">
+														<input type="hidden" id="modal-newsinfo" name="modal-newsinfo">
+														<div class="wysiwyg-editor" style="overflow:scroll;height: 400px;max-height: 400px;" id="modal-editor2"></div>
+														<div id="errmodal-newsinfo" class="col-sm-12 text-danger no-padding"></div>
+													</div>
+												</div>
+											</div>
+										</div>
+										
+									</div>
+
+									<div class="modal-footer no-margin-top">
+										<button type="button" class="btn btn-sm btn-danger" data-dismiss="modal" style="width: 70px;">取消</button>
+										<button id="btn-modal-lang-save" type="button" class="btn btn-sm btn-primary" data-loading-text="提交中..." style="min-width: 70px;">保存</button>
+									</div>
+									</form>
+								</div><!-- /.modal-content -->
+							</div><!-- /.modal-dialog -->
+						</div>
+						{{end}}
+
+					</div><!-- /.page-content -->
+				</div>
+			</div><!-- /.main-content -->
+			{{ template "foot.html" .}}
+
+		<!-- custom scripts -->
+		<script type="text/javascript">
+			function getClassTreeData() {
+			    //节点上的数据遵循如下的格式：
+			    var tree = [{
+					id: "1",
+					text: "Node 1", //节点显示的文本值  string
+					selectable: true,
+					state: { //描述节点的初始状态    Object
+						checked: true, //是否选中节点
+						expanded: true, //是否展开节点
+						selected: true //是否选中节点
+					}
+			    }, {
+					id: "2",
+			        text: "Parent 2",
+					selectable: true,
+			        nodes: [{
+						id: "7",
+			            text: "Child 7",
+						selectable: true
+			        }]
+			    }, {
+					id: "11",
+			        text: "Parent 11",
+					selectable: true
+			    }, {
+					id: "12",
+			        text: "Parent 12",
+					selectable: true
+			    }, {
+					id: "13",
+			        text: "Parent 13",
+					selectable: true
+			    }];
+			 
+			    return tree;
+			}
+			var treeview = $("#modal-edit #modal-newsclassno").ktreeview({
+				data: getClassTreeData()
+			}, treeViewChange);
+			
+			function treeViewChange(data) {
+				console.log(data);
+				console.log(treeview.getName());
+				console.log(treeview.getValue());
+			}
+
+			$('#modal-edit #modal-file').ace_file_input({
+				style: 'well',
+				btn_choose: '拖拽 或 选择图片',
+				btn_change: null,
+				no_icon: '',//ace-icon fa fa-picture-o
+				allowExt: ["jpeg", "jpg", "png" , "bmp"],
+				allowMime: ["image/jpg", "image/jpeg", "image/png", "image/gif"],
+				droppable: false,
+				thumbnail: 'small',//large | fit
+				multiple: true,
+				maxSize: 1 * 1024 * 1024,
+				//,icon_remove:null//set null, to hide remove/reset button
+				before_change:function(files, dropped) {
+					//Check an example below
+					//or examples/file-upload.html
+					console.log('before_change');
+					return true;
+				},
+				before_remove : function() {
+					console.log('before_remove');
+					return true;
+				},
+				preview_error : function(filename, error_code) {
+					//name of the file that failed
+					//error_code values
+					//1 = 'FILE_LOAD_FAILED',
+					//2 = 'IMAGE_LOAD_FAILED',
+					//3 = 'THUMBNAIL_FAILED'
+					//alert(error_code);
+					console.log('preview_error');
+				}
+		
+			}).on('change', function(){
+				//console.log($(this).data('ace_input_files'));
+				//console.log($(this).data('ace_input_method'));
+				console.log('change');
+			}).on('file.error.ace', function(event, info) {
+				console.log('图片格式不正确');
+			});
+
+			$('#modal-edit').on('shown.bs.modal', function (event) {
+				//设置弹出框第一个显示的input获取焦点
+				setFirstInputFocus($(this))
+			});
+			$('#modal-edit-lang').on('shown.bs.modal', function (event) {
+				//设置弹出框第一个显示的input获取焦点
+				setFirstInputFocus($(this))
+			});
+
+			$('#btn-search').on('click', function(e) {
+				$('#pageNo').val(1);
+				$('#cmd').val('list_search');
+				$("#mainform").submit();
+			});
+
+			$('#btn-del').on(ace.click_event, function() {
+				var arr_no = [];
+				$("input[name='selectNo']").each(function(){
+					if ($(this).is(':checked')) {
+						arr_no.push($(this).val());
+					}
+				});
+
+				if (arr_no.length == 0) {
+					showAlertDialog('请最少选择一条数据！');
+					return false;
+				}
+				bootbox.confirm("确定要删除数据吗？", function (result) {
+					if (result) {
+						$('#cmd').val('list_del');
+						$("#mainform").submit();
+					}
+				});
+			});
+
+			$('#btn-download').on('click', function(e) {
+				$('#cmd').val('list_download');
+				$("#mainform").submit();
+			});
+
+			$('#modal-edit').on('show.bs.modal', function (event) {
+				var modal = $(this);
+				var button = $(event.relatedTarget) // Button that triggered the modal
+				//var recipient = button.data('whatever') // Extract info from data-* attributes
+
+				if(typeof($(button).attr("id")) == "undefined")
+					return;
+
+				clearModalValue(modal);
+				clearModalError(modal);
+
+				if ($(button).attr("id") == 'btn-add') {
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+					modal.find('.modal-title').text('新增商品')
+					modal.find('#modal-newsheadcount').val('0');
+					modal.find('#modal-newstreatment').val('0');
+					modal.find('#modal-newsperiod').val('0');
+				} else if ($(button).attr("id") == 'btn-edit') {
+					var arr_no = [];
+					$("input[name='selectNo']").each(function(){
+						if ($(this).is(':checked')) {
+							arr_no.push($(this).val());
+						}
+					});
+
+					var errmsg = '';
+					if (arr_no.length == 0)
+						errmsg = '请选择一条数据！';
+					else if (arr_no.length > 1)
+						errmsg = '只能选择一条数据！';
+
+					if (errmsg != '') {
+						showAlertDialog(errmsg);
+						return false;
+					}
+
+					showEdit(modal, arr_no[0]);
+
+				} else if ($(button).attr("id").indexOf('btn-edit-') == 0 || 
+							$(button).attr("id").indexOf('btn-edit2-') == 0) {
+					var selectNo = $(button).data("selectno");
+					if (selectNo == null || selectNo == '') {
+						showAlertDialog('未知错误！');
+						return false;
+					}
+
+					showEdit(modal, selectNo);
+				} else {
+					modal.modal('hide');
+					showAlertDialog('系统错误！');
+				}
+			});
+
+			$('#btn-modal-save').on(ace.click_event, function() {
+				//treeview.setValue('13');
+				//return;
+				var modal = $('#modal-edit');
+				var btn = $(this);
+				btn.button('loading');
+
+				var data = removeKeyModal($('#modalform').serializeObject());
+				if ($('#modal-newsno').val() == '')
+					data['cmd'] = 'ajax_add';
+				else
+					data['cmd'] = 'ajax_edit';
+
+				ajaxPost(window.location.pathname, data, function(obj){
+					btn.button('reset');
+
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret == 1000) {
+						showModalError(obj.error, modal);
+						return;
+					} else if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.modal('hide');
+					$('#cmd').val('list_search');
+					$("#mainform").submit();
+				});
+			});
+
+			function showEdit(modal,value) {
+
+				modal.find('.modal-progress').show();
+				modal.find('.modal-content').hide();
+
+				var data = {"cmd":"ajax_detail", "searchNo":value};
+				ajaxPost(window.location.pathname, data, function(obj){
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+
+					modal.find('.modal-title').text('编辑商品：' + obj.data.NewsName);
+
+					showModalValue(obj.data, modal);
+				});
+			}
+
+			//必须在外部，否则html元素那边无法调用
+			function delSubmit(value) {
+				if (value == null || value == '') {
+					showAlertDialog('请选择一条数据！');
+					return false;
+				}
+
+				bootbox.confirm("确定要删除数据吗？", function (result) {
+					if (result) {
+						$('#searchNo').val(value);
+						$('#cmd').val('list_del');
+						$("#mainform").submit();
+					}
+				});
+				return false;
+			}
+
+
+			//language
+			$('#modal-edit-lang').on('show.bs.modal', function (event) {
+				var modal = $(this);
+				var button = $(event.relatedTarget) // Button that triggered the modal
+				//var recipient = button.data('whatever') // Extract info from data-* attributes
+
+				clearModalValue(modal);
+				clearModalError(modal);
+
+				var selectNo = $(button).data("selectno");
+				if (selectNo == null || selectNo == '') {
+					showAlertDialog('未知错误！');
+					return false;
+				}
+
+				modal.find('#modal-langcode').val($(button).data("lang"));
+
+				showEditLang(modal, selectNo, $(button).data("lang"), $(button).html());
+			});
+			
+			//language
+			function showEditLang(modal,value, langcode, langname) {
+
+				modal.find('.modal-progress').show();
+				modal.find('.modal-content').hide();
+
+				var data = {"cmd":"ajax_detail_lang", "searchNo":value, "langcode":langcode};
+				ajaxPost(window.location.pathname, data, function(obj){
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+					if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.find('.modal-progress').hide();
+					modal.find('.modal-content').show();
+
+					modal.find('.modal-title').text(langname + '：' + obj.sData.Newsame);
+
+					showModalValue(obj.data, modal);
+				});
+			}
+
+			$('#btn-modal-lang-save').on(ace.click_event, function() {
+				var modal = $('#modal-edit-lang');
+				var btn = $(this);
+				btn.button('loading');
+
+				var data = removeKeyModal($('#modallangform').serializeObject());
+				if (modal.find('#modal-newsno').val() == '' ||
+					modal.find('#modal-langcode').val() == '') {
+					showAlertDialog('服务器发生未知错误！');
+					return;
+				}
+				data['cmd'] = 'ajax_edit_lang';
+
+				ajaxPost(window.location.pathname, data, function(obj){
+					btn.button('reset');
+
+					var err = CheckAjaxReturnData(obj);
+					if (err != '') {
+						modal.modal('hide');
+						showAlertDialog(err);
+						return;
+					}
+
+					if (obj.ret == 1000) {
+						showModalError(obj.error, modal);
+						return;
+					} else if (obj.ret != 0) {
+						modal.modal('hide');
+						if (obj.hasOwnProperty('msg') && obj.msg != '')
+							showAlertDialog(obj.msg);
+						else
+							showAlertDialog('服务器发生未知错误！');
+						return;
+					}
+
+					modal.modal('hide');
+					btn.button('reset');
+				});
+			});
+
+		</script>
+	</body>
+</html>
+{{ end }}
